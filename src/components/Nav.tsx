@@ -14,6 +14,9 @@ export default function Nav() {
           <Link href="/expenses" className="text-gray-600 hover:text-indigo-600">
             账单
           </Link>
+          <Link href="/resolved-expenses" className="text-gray-600 hover:text-indigo-600">
+            已结清
+          </Link>
           <Link
             href="/add"
             className="bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700"

@@ -51,4 +51,12 @@ export async function deleteExpense(id: string) {
   await prisma.expense.update({ where: { id }, data: { deletedAt: new Date() } });
   revalidatePath("/");
   revalidatePath("/expenses");
+  revalidatePath("/resolved-expenses");
+}
+
+export async function resolveExpense(id: string) {
+  await prisma.expense.update({ where: { id }, data: { resolvedAt: new Date() } });
+  revalidatePath("/");
+  revalidatePath("/expenses");
+  revalidatePath("/resolved-expenses");
 }
