@@ -1,7 +1,10 @@
-import type { Expense, Split } from "../generated/prisma";
 import { MEMBERS } from "./constants";
 
-type ExpenseWithSplits = Expense & { splits: Split[] };
+type ExpenseWithSplits = {
+  paidBy: string;
+  amount: number;
+  splits: { member: string; amount: number }[];
+};
 
 export type NetBalance = Record<string, number>;
 

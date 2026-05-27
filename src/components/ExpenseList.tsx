@@ -1,5 +1,5 @@
-import type { Expense, Split } from "@/generated/prisma";
-import { deleteExpense } from "@/lib/actions";
+import type { Expense, Split } from "@/generated/prisma/client";
+import DeleteButton from "./DeleteButton";
 
 type ExpenseWithSplits = Expense & { splits: Split[] };
 
@@ -42,14 +42,7 @@ export default function ExpenseList({ expenses }: Props) {
               <span className="text-lg font-bold text-gray-900">
                 ¥{expense.amount.toFixed(2)}
               </span>
-              <form action={deleteExpense.bind(null, expense.id)}>
-                <button
-                  type="submit"
-                  className="text-xs text-red-400 hover:text-red-600"
-                >
-                  Delete
-                </button>
-              </form>
+              <DeleteButton id={expense.id} />
             </div>
           </div>
         </li>
