@@ -18,14 +18,14 @@ export default function DeleteButton({ id }: { id: string }) {
         onClick={() => setShowConfirm(true)}
         className="text-xs text-red-400 hover:text-red-600"
       >
-        Delete
+        删除
       </button>
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-72 space-y-4">
-            <p className="text-sm font-medium text-gray-800">Delete this expense?</p>
-            <p className="text-xs text-gray-500">This action cannot be undone.</p>
+            <p className="text-sm font-medium text-gray-800">确认删除这笔账单？</p>
+            <p className="text-xs text-gray-500">删除后无法恢复。</p>
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
@@ -33,7 +33,7 @@ export default function DeleteButton({ id }: { id: string }) {
                 onClick={() => setShowConfirm(false)}
                 className="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
               >
-                Cancel
+                取消
               </button>
               <button
                 type="button"
@@ -47,7 +47,7 @@ export default function DeleteButton({ id }: { id: string }) {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                   </svg>
                 )}
-                {isPending ? "Deleting…" : "Yes, delete"}
+                {isPending ? "删除中…" : "确认删除"}
               </button>
             </div>
           </div>

@@ -9,7 +9,7 @@ export default function BalanceSummary({ net, transactions }: Props) {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Balances</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">余额</h2>
         <div className="grid grid-cols-2 gap-3">
           {Object.entries(net).map(([member, amount]) => (
             <div
@@ -35,9 +35,9 @@ export default function BalanceSummary({ net, transactions }: Props) {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Settle Up</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">还款建议</h2>
         {transactions.length === 0 ? (
-          <p className="text-gray-500 text-sm">Everyone is settled up.</p>
+          <p className="text-gray-500 text-sm">大家已经结清啦 🎉</p>
         ) : (
           <ul className="space-y-2">
             {transactions.map((t, i) => (

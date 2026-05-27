@@ -70,24 +70,24 @@ export default function AddExpensePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Add Expense</h1>
+      <h1 className="text-2xl font-bold text-gray-900">记一笔</h1>
 
       <form action={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Title
+            描述
           </label>
           <input
             name="title"
             required
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="e.g. Dinner at Canton Tower"
+            placeholder="例：广州塔晚饭"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Amount (¥)
+            金额 (¥)
           </label>
           <input
             name="amount"
@@ -104,7 +104,7 @@ export default function AddExpensePage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Paid By
+            付款人
           </label>
           <select
             name="paidBy"
@@ -121,7 +121,7 @@ export default function AddExpensePage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date
+            日期
           </label>
           <input
             name="date"
@@ -134,7 +134,7 @@ export default function AddExpensePage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Split Type
+            分摊方式
           </label>
           <input type="hidden" name="splitType" value={splitType} />
           <div className="flex gap-2">
@@ -143,13 +143,13 @@ export default function AddExpensePage() {
                 key={t}
                 type="button"
                 onClick={() => setSplitType(t)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium capitalize ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   splitType === t
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {t}
+                {t === "equal" ? "平均" : t === "percentage" ? "按比例" : "自定义"}
               </button>
             ))}
           </div>
@@ -157,7 +157,7 @@ export default function AddExpensePage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Split Between
+            参与成员
           </label>
           <div className="space-y-2">
             {MEMBERS.map((m) => (
@@ -238,7 +238,7 @@ export default function AddExpensePage() {
                   : "text-red-500"
               }`}
             >
-              Total: {percentageSum.toFixed(1)}% {Math.abs(percentageSum - 100) < 0.1 ? "✓" : "(must equal 100%)"}
+              合计：{percentageSum.toFixed(1)}% {Math.abs(percentageSum - 100) < 0.1 ? "✓" : "（必须等于 100%）"}
             </p>
           )}
 
@@ -250,8 +250,8 @@ export default function AddExpensePage() {
                   : "text-red-500"
               }`}
             >
-              Total: ¥{exactSum.toFixed(2)} / ¥{total.toFixed(2)}{" "}
-              {Math.abs(exactSum - total) < 0.02 ? "✓" : "(must equal expense amount)"}
+              合计：¥{exactSum.toFixed(2)} / ¥{total.toFixed(2)}{" "}
+              {Math.abs(exactSum - total) < 0.02 ? "✓" : "（必须等于总金额）"}
             </p>
           )}
         </div>
@@ -267,7 +267,7 @@ export default function AddExpensePage() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
             </svg>
           )}
-          {isPending ? "Saving…" : "Save Expense"}
+          {isPending ? "保存中…" : "保存"}
         </button>
       </form>
     </div>

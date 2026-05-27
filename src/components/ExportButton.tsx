@@ -45,7 +45,7 @@ export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits
       onClick={handleExport}
       className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors"
     >
-      Export CSV
+      导出 CSV
     </button>
   );
 }

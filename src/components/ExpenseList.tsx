@@ -11,7 +11,7 @@ export default function ExpenseList({ expenses }: Props) {
   if (expenses.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500">
-        No expenses yet.
+        暂无账单。
       </div>
     );
   }
@@ -27,7 +27,7 @@ export default function ExpenseList({ expenses }: Props) {
             <div>
               <p className="font-semibold text-gray-900">{expense.title}</p>
               <p className="text-sm text-gray-500">
-                Paid by{" "}
+                付款人：{" "}
                 <span className="font-medium text-gray-700">{expense.paidBy}</span>
                 {" · "}
                 {new Date(expense.date).toLocaleDateString("zh-CN")}

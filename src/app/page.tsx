@@ -16,13 +16,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Guangdong Trip</h1>
+      <h1 className="text-2xl font-bold text-gray-900">广东之旅</h1>
       <BalanceSummary net={net} transactions={transactions} />
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-800">Recent Expenses</h2>
+          <h2 className="text-lg font-semibold text-gray-800">最近账单</h2>
           <a href="/expenses" className="text-sm text-indigo-600 hover:underline">
-            View all
+            查看全部
           </a>
         </div>
         <ExpenseList expenses={recent} />
