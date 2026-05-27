@@ -5,6 +5,7 @@ import ExpenseList from "@/components/ExpenseList";
 
 export default async function DashboardPage() {
   const expenses = await prisma.expense.findMany({
+    where: { deletedAt: null },
     include: { splits: true },
     orderBy: { date: "desc" },
   });

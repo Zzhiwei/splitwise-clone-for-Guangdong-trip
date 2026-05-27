@@ -4,6 +4,7 @@ import ExportButton from "@/components/ExportButton";
 
 export default async function ExpensesPage() {
   const expenses = await prisma.expense.findMany({
+    where: { deletedAt: null },
     include: { splits: true },
     orderBy: { date: "desc" },
   });

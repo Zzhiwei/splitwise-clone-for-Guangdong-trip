@@ -8,13 +8,14 @@ datasource db {
 }
 
 model Expense {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
   amount    Float
   paidBy    String
-  date      DateTime @default(now())
-  createdAt DateTime @default(now())
+  date      DateTime  @default(now())
+  createdAt DateTime  @default(now())
   splitType String
+  deletedAt DateTime?
   splits    Split[]
 }
 
