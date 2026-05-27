@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  title     String
+  amount    Float
+  paidBy    String
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  splitType String
+  splits    Split[]
+}
+
+model Split {
+  id        String  @id @default(cuid())
+  expenseId String
+  member    String
+  amount    Float
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+}
