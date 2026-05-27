@@ -26,7 +26,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
+# git ignore all files starting with .env but keep .env.example
+.env*
+!.env.example
+
 
 # vercel
 .vercel
