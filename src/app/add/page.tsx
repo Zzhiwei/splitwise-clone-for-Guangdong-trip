@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { addExpense } from "@/lib/actions";
 import { MEMBERS } from "@/lib/constants";
 
@@ -18,6 +18,7 @@ export default function AddExpensePage() {
   const [exactAmounts, setExactAmounts] = useState<Record<string, string>>(
     Object.fromEntries(MEMBERS.map((m) => [m, ""]))
   );
+  const [isPending, startTransition] = useTransition();
 
   function computeSplits() {
     const total = parseFloat(amount) || 0;
@@ -48,10 +49,10 @@ export default function AddExpensePage() {
     }));
   }
 
-  async function handleSubmit(formData: FormData) {
+  function handleSubmit(formData: FormData) {
     const splits = computeSplits();
     formData.set("splits", JSON.stringify(splits));
-    await addExpense(formData);
+    startTransition(() => addExpense(formData));
   }
 
   const today = new Date().toISOString().split("T")[0];
@@ -257,9 +258,16 @@ export default function AddExpensePage() {
 
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
+          disabled={isPending}
+          className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Save Expense
+          {isPending && (
+            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+          )}
+          {isPending ? "Saving…" : "Save Expense"}
         </button>
       </form>
     </div>
