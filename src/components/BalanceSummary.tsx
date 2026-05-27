@@ -14,11 +14,11 @@ export default function BalanceSummary({ net, transactions }: Props) {
           {Object.entries(net).map(([member, amount]) => (
             <div
               key={member}
-              className="flex justify-between items-center p-3 rounded-lg bg-gray-50"
+              className="flex flex-col p-3 rounded-lg bg-gray-50"
             >
               <span className="font-medium text-gray-700">{member}</span>
               <span
-                className={`font-bold ${
+                className={`font-bold text-sm mt-0.5 ${
                   amount > 0
                     ? "text-green-600"
                     : amount < 0
