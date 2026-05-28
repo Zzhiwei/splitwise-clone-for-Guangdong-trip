@@ -24,13 +24,16 @@ To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns ar
 | `prisma/schema.prisma` | Data model |
 | `prisma.config.ts` | Prisma CLI config — reads `DATABASE_URL` / `DIRECT_URL` from `.env` |
 | `src/lib/db.ts` | Prisma singleton using `PrismaPg` adapter |
-| `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense` (soft delete) |
+| `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense`, `resolveExpense` |
 | `src/lib/balance.ts` | `calculateNetBalances` + `simplifyDebts` (greedy two-pointer) |
 | `src/lib/constants.ts` | `MEMBERS` array |
-| `src/app/page.tsx` | Dashboard — balances + last 20 expenses |
-| `src/app/expenses/page.tsx` | Full expense history + CSV export |
+| `src/app/page.tsx` | Dashboard — balances + last 20 expenses (excludes resolved) |
+| `src/app/expenses/page.tsx` | Active expense history + CSV export |
+| `src/app/resolved-expenses/page.tsx` | Resolved/settled expenses archive |
 | `src/app/add/page.tsx` | Add expense form (client component) |
 | `src/components/DeleteButton.tsx` | Confirm modal + soft-delete action |
+| `src/components/ResolveButton.tsx` | Confirm modal + resolve action |
+| `src/components/ExpenseList.tsx` | Expense cards; accepts `showResolve` prop |
 | `src/components/BalanceSummary.tsx` | Net balances + settle-up transactions |
 
 ## Database
@@ -61,9 +64,14 @@ npm run build     # production build
 npm run lint
 ```
 
-## Soft delete
+## Soft delete & resolve
 
-`Expense.deletedAt` — set to `new Date()` on delete, never actually removed. All queries filter `where: { deletedAt: null }`.
+Both use nullable timestamp fields on `Expense` — rows are never hard-deleted.
+
+- `deletedAt` — set on delete. All active queries filter `where: { deletedAt: null }`.
+- `resolvedAt` — set when an expense is marked settled. Active queries also filter `where: { resolvedAt: null }`. Resolved expenses appear only on `/resolved-expenses`.
+
+The dashboard balance calculations naturally exclude resolved expenses because they use the same filtered query.
 
 ## Split types
 
