@@ -1,6 +1,6 @@
 # Splitwize
 
-Lightweight Splitwise clone for a 4-person Guangdong trip. No auth — small trusted group. UI is in Chinese.
+Lightweight Splitwise clone for a 4-person Guangdong trip. Password-protected (shared secret). UI is in Chinese.
 
 ## Stack
 
@@ -24,7 +24,9 @@ To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns ar
 | `prisma/schema.prisma` | Data model |
 | `prisma.config.ts` | Prisma CLI config — reads `DATABASE_URL` / `DIRECT_URL` from `.env` |
 | `src/lib/db.ts` | Prisma singleton using `PrismaPg` adapter |
-| `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense`, `resolveExpense` |
+| `src/middleware.ts` | Auth gate — redirects to `/login` if `splitwize_auth` cookie absent |
+| `src/app/login/page.tsx` | Full-screen password entry page |
+| `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense`, `resolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
 | `src/lib/balance.ts` | `calculateNetBalances` + `simplifyDebts` (greedy two-pointer) |
 | `src/lib/constants.ts` | `MEMBERS` array |
 | `src/app/page.tsx` | Dashboard — balances + last 20 expenses (excludes resolved) |
@@ -34,6 +36,7 @@ To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns ar
 | `src/components/DeleteButton.tsx` | Confirm modal + soft-delete action |
 | `src/components/ResolveButton.tsx` | Confirm modal + resolve action |
 | `src/components/ExpenseList.tsx` | Expense cards; accepts `showResolve` prop |
+| `src/components/SplitRow.tsx` | Per-split repayment toggle (tappable, calls `toggleSplitPaidBack`) |
 | `src/components/BalanceSummary.tsx` | Net balances + settle-up transactions |
 
 ## Database
@@ -44,6 +47,7 @@ To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns ar
 ```
 DATABASE_URL=postgresql://...   # pooled connection (runtime)
 DIRECT_URL=postgresql://...     # direct connection (migrations)
+APP_PASSWORD=...                # shared password for the auth gate
 ```
 
 ### Migrations
@@ -64,6 +68,10 @@ npm run build     # production build
 npm run lint
 ```
 
+## Auth
+
+`src/middleware.ts` checks for an `httpOnly` cookie `splitwize_auth=ok` on every request (except `/login` and static assets). Missing or invalid cookie → redirect to `/login`. The login page calls the `verifyPassword` server action, which compares against `process.env.APP_PASSWORD` and sets the cookie (30-day expiry) on success. `APP_PASSWORD` is never exposed to the client.
+
 ## Soft delete & resolve
 
 Both use nullable timestamp fields on `Expense` — rows are never hard-deleted.
@@ -73,6 +81,12 @@ Both use nullable timestamp fields on `Expense` — rows are never hard-deleted.
 
 The dashboard balance calculations naturally exclude resolved expenses because they use the same filtered query.
 
+## Per-split repayment (`paidBack`)
+
+`Split.paidBack Boolean @default(false)` tracks whether a participant has already paid the expense payer back for their share. Toggled via `SplitRow` in the expense list (tap to toggle; payer's own split row is non-interactive).
+
+Balance logic in `calculateNetBalances`: if `paidBack = true`, the payer is debited that split's amount (money already received); if `false`, the member is debited as usual. This means marking splits as paid-back reduces the payer's net positive and zeroes out the member's debt without requiring a separate expense.
+
 ## Split types
 
 - `equal` — total divided evenly; rounding remainder goes to last person
@@ -81,4 +95,4 @@ The dashboard balance calculations naturally exclude resolved expenses because t
 
 ## Deployment
 
-Hosted on Vercel. Set `DATABASE_URL` and `DIRECT_URL` in Vercel environment variables. Run `npx prisma migrate deploy` after any schema changes.
+Hosted on Vercel. Set `DATABASE_URL`, `DIRECT_URL`, and `APP_PASSWORD` in Vercel environment variables. Run `npx prisma migrate deploy` after any schema changes.
