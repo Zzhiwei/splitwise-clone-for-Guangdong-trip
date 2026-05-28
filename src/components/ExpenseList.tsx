@@ -1,6 +1,7 @@
 import type { Expense, Split } from "@/generated/prisma/client";
 import DeleteButton from "./DeleteButton";
 import ResolveButton from "./ResolveButton";
+import UnresolveButton from "./UnresolveButton";
 import SplitRow from "./SplitRow";
 
 type ExpenseWithSplits = Expense & { splits: (Split & { paidBack: boolean })[] };
@@ -8,9 +9,10 @@ type ExpenseWithSplits = Expense & { splits: (Split & { paidBack: boolean })[] }
 interface Props {
   expenses: ExpenseWithSplits[];
   showResolve?: boolean;
+  showUnresolve?: boolean;
 }
 
-export default function ExpenseList({ expenses, showResolve = true }: Props) {
+export default function ExpenseList({ expenses, showResolve = true, showUnresolve = false }: Props) {
   if (expenses.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500">
@@ -53,6 +55,7 @@ export default function ExpenseList({ expenses, showResolve = true }: Props) {
                 ¥{expense.amount.toFixed(2)}
               </span>
               {showResolve && <ResolveButton id={expense.id} />}
+              {showUnresolve && <UnresolveButton id={expense.id} />}
               <DeleteButton id={expense.id} />
             </div>
           </div>

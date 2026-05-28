@@ -26,7 +26,7 @@ To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns ar
 | `src/lib/db.ts` | Prisma singleton using `PrismaPg` adapter |
 | `src/middleware.ts` | Auth gate — redirects to `/login` if `splitwize_auth` cookie absent |
 | `src/app/login/page.tsx` | Full-screen password entry page |
-| `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense`, `resolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
+| `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense`, `resolveExpense`, `unresolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
 | `src/lib/balance.ts` | `calculateNetBalances` + `simplifyDebts` (greedy two-pointer) |
 | `src/lib/constants.ts` | `MEMBERS` array |
 | `src/app/page.tsx` | Dashboard — balances + last 20 expenses (excludes resolved) |
@@ -35,7 +35,8 @@ To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns ar
 | `src/app/add/page.tsx` | Add expense form (client component) |
 | `src/components/DeleteButton.tsx` | Confirm modal + soft-delete action |
 | `src/components/ResolveButton.tsx` | Confirm modal + resolve action |
-| `src/components/ExpenseList.tsx` | Expense cards; accepts `showResolve` prop |
+| `src/components/UnresolveButton.tsx` | Confirm modal + unresolve action |
+| `src/components/ExpenseList.tsx` | Expense cards; accepts `showResolve` and `showUnresolve` props |
 | `src/components/SplitRow.tsx` | Per-split repayment toggle (tappable, calls `toggleSplitPaidBack`) |
 | `src/components/BalanceSummary.tsx` | Net balances + settle-up transactions |
 
@@ -77,7 +78,7 @@ npm run lint
 Both use nullable timestamp fields on `Expense` — rows are never hard-deleted.
 
 - `deletedAt` — set on delete. All active queries filter `where: { deletedAt: null }`.
-- `resolvedAt` — set when an expense is marked settled. Active queries also filter `where: { resolvedAt: null }`. Resolved expenses appear only on `/resolved-expenses`.
+- `resolvedAt` — set when an expense is marked settled. Active queries also filter `where: { resolvedAt: null }`. Resolved expenses appear only on `/resolved-expenses`. Can be unresolved (set back to `null`) via the `撤销结清` button on that page.
 
 The dashboard balance calculations naturally exclude resolved expenses because they use the same filtered query.
 

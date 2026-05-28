@@ -62,6 +62,13 @@ export async function resolveExpense(id: string) {
   revalidatePath("/resolved-expenses");
 }
 
+export async function unresolveExpense(id: string) {
+  await prisma.expense.update({ where: { id }, data: { resolvedAt: null } });
+  revalidatePath("/");
+  revalidatePath("/expenses");
+  revalidatePath("/resolved-expenses");
+}
+
 export async function toggleSplitPaidBack(splitId: string, paidBack: boolean) {
   await prisma.split.update({ where: { id: splitId }, data: { paidBack } });
   revalidatePath("/");
