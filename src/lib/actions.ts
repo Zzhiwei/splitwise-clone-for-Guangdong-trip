@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { prisma } from "./db";
 import { MEMBERS } from "./constants";
 
@@ -59,4 +60,16 @@ export async function resolveExpense(id: string) {
   revalidatePath("/");
   revalidatePath("/expenses");
   revalidatePath("/resolved-expenses");
+}
+
+export async function verifyPassword(password: string): Promise<{ error: string } | void> {
+  if (password !== process.env.APP_PASSWORD) {
+    return { error: "密码错误" };
+  }
+  cookies().set("splitwize_auth", "ok", {
+    httpOnly: true,
+    maxAge: 60 * 60 * 24 * 30,
+    path: "/",
+  });
+  redirect("/");
 }
