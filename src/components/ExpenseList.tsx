@@ -1,8 +1,9 @@
 import type { Expense, Split } from "@/generated/prisma/client";
 import DeleteButton from "./DeleteButton";
 import ResolveButton from "./ResolveButton";
+import SplitRow from "./SplitRow";
 
-type ExpenseWithSplits = Expense & { splits: Split[] };
+type ExpenseWithSplits = Expense & { splits: (Split & { paidBack: boolean })[] };
 
 interface Props {
   expenses: ExpenseWithSplits[];
@@ -34,11 +35,18 @@ export default function ExpenseList({ expenses, showResolve = true }: Props) {
                 {" · "}
                 {new Date(expense.date).toLocaleDateString("zh-CN")}
               </p>
-              <p className="text-xs text-gray-400 mt-1">
-                {expense.splits
-                  .map((s) => `${s.member} (¥${s.amount.toFixed(2)})`)
-                  .join(", ")}
-              </p>
+              <div className="mt-2 space-y-0.5">
+                {expense.splits.map((s) => (
+                  <SplitRow
+                    key={s.id}
+                    splitId={s.id}
+                    member={s.member}
+                    amount={s.amount}
+                    paidBack={s.paidBack}
+                    paidBy={expense.paidBy}
+                  />
+                ))}
+              </div>
             </div>
             <div className="flex items-center gap-3 ml-4 shrink-0">
               <span className="text-lg font-bold text-gray-900">

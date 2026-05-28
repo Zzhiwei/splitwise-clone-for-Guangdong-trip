@@ -25,5 +25,6 @@ model Split {
   expenseId String
   member    String
   amount    Float
+  paidBack  Boolean @default(false)
   expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
 }

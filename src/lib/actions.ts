@@ -62,6 +62,12 @@ export async function resolveExpense(id: string) {
   revalidatePath("/resolved-expenses");
 }
 
+export async function toggleSplitPaidBack(splitId: string, paidBack: boolean) {
+  await prisma.split.update({ where: { id: splitId }, data: { paidBack } });
+  revalidatePath("/");
+  revalidatePath("/expenses");
+}
+
 export async function verifyPassword(password: string): Promise<{ error: string } | void> {
   if (password !== process.env.APP_PASSWORD) {
     return { error: "密码错误" };

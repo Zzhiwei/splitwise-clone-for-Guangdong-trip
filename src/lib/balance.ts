@@ -3,7 +3,7 @@ import { MEMBERS } from "./constants";
 type ExpenseWithSplits = {
   paidBy: string;
   amount: number;
-  splits: { member: string; amount: number }[];
+  splits: { member: string; amount: number; paidBack: boolean }[];
 };
 
 export type NetBalance = Record<string, number>;
@@ -20,7 +20,11 @@ export function calculateNetBalances(expenses: ExpenseWithSplits[]): NetBalance 
   for (const expense of expenses) {
     net[expense.paidBy] += expense.amount;
     for (const split of expense.splits) {
-      net[split.member] -= split.amount;
+      if (split.paidBack) {
+        net[expense.paidBy] -= split.amount;
+      } else {
+        net[split.member] -= split.amount;
+      }
     }
   }
 
