@@ -50,7 +50,7 @@ Data recorded under a member who is no longer in `MEMBERS` breaks `calculateNetB
 
 ## Database
 
-**There is no local DB.** All Prisma operations (migrations, queries) run against the remote Supabase project.
+**There is no local DB, and local dev uses the production DB.** `npm run dev` and every Prisma command run against the same Supabase project that the deployed app uses, so real group data is live while developing. Clean up any test rows you create, never touch rows you did not create, and note that a schema migration applied from a dev machine is already live in production (no separate `migrate deploy` is needed for the production database, though Vercel's `DATABASE_URL`/`DIRECT_URL` must point at the same project).
 
 `.env` needs:
 ```
@@ -121,6 +121,20 @@ Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-G
 - `percentage` — per-member percentage (must sum to 100%)
 - `exact` — per-member amounts (must sum within ±0.02 of total). On the form they are typed in the selected currency; each is converted to VND and the last member's share absorbs rounding so the splits sum to the converted total
 
+## Daily CSV export (Supabase Edge Function)
+
+`supabase/functions/export-expenses/index.ts` is a Deno Edge Function (excluded from the Next typecheck in `tsconfig.json`). It reads all non-deleted expenses (active and resolved, with a `Status` column), builds the same CSV columns as `ExportButton`, and uploads `expenses-YYYY-MM-DD.csv` to the private Storage bucket `expense-exports` (one file per day, same-day reruns overwrite). It returns early unless the current date in `Asia/Ho_Chi_Minh` is inside `WINDOW` (2026-11-19 to 2026-11-26) and requires the `x-cron-secret` header to equal the `EXPORT_CRON_SECRET` function secret. `MEMBERS` is duplicated inside the function (Deno cannot import from `src/`); update both when members change.
+
+`supabase/setup-export-cron.sql` creates the bucket and schedules `pg_cron` job `export-expenses-daily` (`59 16 19-26 11 *` UTC = 23:59 Vietnam time, 19-26 November) which calls the function through `pg_net`, reading the secret from Vault. `pg_cron` has no year field, so unschedule the job after the trip (`select cron.unschedule('export-expenses-daily');`).
+
+Status: deployed and scheduled on the production project (`jysgnkufiqafkmayhnog`) on 2026-11-15. Verified end to end: wrong or missing secret returns 401, a call outside the window returns `outside window (...)`, and inside the window it uploads a correct CSV (tested once with a temporary window and a seed row, both removed). The cron job's own HTTP call (Vault secret) was also run by hand and returned 200. The real scheduled firing happens first on 2026-11-19 23:59 Vietnam time; check Storage → `expense-exports` the next morning.
+
+If you need to redo it (the Supabase CLI keeps local state in `supabase/.temp/`, which is gitignored):
+- Deploy: `HTTPS_PROXY=... npx supabase functions deploy export-expenses --no-verify-jwt --use-api --remote=jysgnkufiqafkmayhnog --yes` (needs `npx supabase login` first; JWT verification must stay off because the cron call only sends the shared secret).
+- Secret: `supabase secrets set EXPORT_CRON_SECRET=<value> --remote=...`; the same value must be in Vault as `export_cron_secret` (`setup-export-cron.sql` does that).
+- Inspect a run: `select status_code, content from net._http_response order by created desc limit 5;` and `select * from cron.job_run_details order by start_time desc limit 5;`.
+- After the trip: `select cron.unschedule('export-expenses-daily');`.
+
 ## Known limitations
 
 - Money columns are `Float` (double precision). This is accurate enough for trip amounts: balances are rounded to 0.01 and split sums allow ±0.02. The one visible effect is 1 đồng display rounding, since VND is stored with 2 decimals but shown as whole đồng, so the displayed splits of an expense can differ from its displayed total by a few đồng. Switching to integer VND would mean changing `balance.ts` and the split code, so it was deliberately not done.
@@ -128,4 +142,4 @@ Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-G
 
 ## Deployment
 
-Hosted on Vercel. Set `DATABASE_URL`, `DIRECT_URL`, and `APP_PASSWORD` in Vercel environment variables. Run `npx prisma migrate deploy` after any schema changes.
+Hosted on Vercel. Set `DATABASE_URL`, `DIRECT_URL`, and `APP_PASSWORD` in Vercel environment variables. Local dev and production share one database, so migrations applied locally are already live; no separate `migrate deploy` is needed unless you add another environment.
