@@ -1,5 +1,6 @@
 import type { NetBalance, Transaction } from "@/lib/balance";
 import { formatVnd } from "@/lib/format";
+import Avatar from "./Avatar";
 
 interface Props {
   net: NetBalance;
@@ -15,8 +16,10 @@ export default function BalanceSummary({ net, transactions }: Props) {
           {Object.entries(net).map(([member, amount]) => (
             <div
               key={member}
-              className="flex flex-col p-3 rounded-lg bg-gray-50"
+              className="flex items-center gap-3 p-3 rounded-lg bg-gray-50"
             >
+              <Avatar member={member} />
+              <div className="flex flex-col min-w-0">
               <span className="font-medium text-gray-700">{member}</span>
               <span
                 className={`font-bold text-sm mt-0.5 ${
@@ -30,6 +33,7 @@ export default function BalanceSummary({ net, transactions }: Props) {
                 {amount > 0 ? "+" : ""}
                 {formatVnd(amount)}
               </span>
+              </div>
             </div>
           ))}
         </div>

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { prisma } from "./db";
 import { MEMBERS, BASE_CURRENCY, CURRENCIES, type Currency } from "./constants";
+import { FX_KEY } from "./fx";
 
 interface SplitInput {
   member: string;
@@ -61,6 +62,19 @@ export async function addExpense(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/expenses");
   redirect("/");
+}
+
+export async function setFxRate(rate: number) {
+  if (!Number.isFinite(rate) || rate <= 0) {
+    throw new Error("Invalid FX rate");
+  }
+  await prisma.setting.upsert({
+    where: { key: FX_KEY },
+    update: { value: String(rate) },
+    create: { key: FX_KEY, value: String(rate) },
+  });
+  revalidatePath("/");
+  revalidatePath("/add");
 }
 
 export async function deleteExpense(id: string) {

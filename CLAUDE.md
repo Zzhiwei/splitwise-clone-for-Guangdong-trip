@@ -17,7 +17,7 @@ Defined in `src/lib/constants.ts` (`MEMBERS`, plus `TRIP_NAME`). To add/remove m
 
 Data recorded under a member who is no longer in `MEMBERS` breaks `calculateNetBalances` (it produces a `NaN` balance), so clear or archive old-trip data when changing members.
 
-`src/app/profile-pics/` holds one PNG per current member (named after them). The images are not referenced by any code yet.
+`public/profile-pics/<lowercased member name>.png` holds one photo per member (for example `zhiwei.png`); adding a member means adding a matching file. `Avatar` shows them next to each balance on the home page. It uses a plain `<img>` on purpose: `next/image`'s optimizer fetches the file server-side without the auth cookie, so the middleware would redirect it to `/login` and return a 400. The originals are 130-730 KB each and are served unresized.
 
 ## Key files
 
@@ -37,6 +37,9 @@ Data recorded under a member who is no longer in `MEMBERS` breaks `calculateNetB
 | `src/app/resolved-expenses/page.tsx` | Resolved/settled expenses archive |
 | `src/app/add/page.tsx` | Server wrapper for the add form; looks up the last-used FX rate |
 | `src/components/AddExpenseForm.tsx` | Add expense form (client component); converts to VND before submit |
+| `src/lib/fx.ts` | `getFxRate` — reads the global SGD→VND rate from the `Setting` table, falling back to `DEFAULT_SGD_TO_VND` |
+| `src/components/FxRateEditor.tsx` | Rate display + edit control at the top of the home page (calls `setFxRate`) |
+| `src/components/Avatar.tsx` | Member profile picture from `public/profile-pics/` |
 | `src/lib/format.ts` | `formatVnd` (whole đồng, thousands separators, ₫ prefix). Used by every money display |
 | `src/components/DeleteButton.tsx` | Confirm modal + soft-delete action |
 | `src/components/ResolveButton.tsx` | Confirm modal + resolve action |
@@ -74,7 +77,7 @@ npx prisma generate                           # regenerate client after schema c
 
 Run `npm install` before any `npx prisma ...`. Without `node_modules`, `npx` downloads Prisma 8, which rejects `migrate deploy`.
 
-`migrate dev` needs a shadow database, which the Supabase `postgres` user may not be allowed to create. The `20261115120000_add_currency` migration was therefore written by hand (plain `ALTER TABLE ... ADD COLUMN`, matching the `schema.prisma` change) and applied with `migrate deploy`. Do the same for future schema changes if `migrate dev` fails.
+`migrate dev` needs a shadow database, which the Supabase `postgres` user may not be allowed to create. The `20261115120000_add_currency` and `20261115130000_add_setting` migrations were therefore written by hand (plain `ALTER TABLE ... ADD COLUMN` / `CREATE TABLE`, matching the `schema.prisma` change) and applied with `migrate deploy`. Do the same for future schema changes if `migrate dev` fails.
 
 If the generated client is stale after `prisma generate`, delete `src/generated/prisma/` entirely and re-run `npx prisma generate`.
 
@@ -108,7 +111,7 @@ Balance logic in `calculateNetBalances`: if `paidBack = true`, the payer is debi
 
 ## Currency
 
-All stored amounts (`Expense.amount`, `Split.amount`) are VND (`BASE_CURRENCY` in `constants.ts`), so `src/lib/balance.ts` is currency-unaware and unchanged. The add form accepts VND or SGD (`CURRENCIES`). For SGD it shows one editable rate field ("1 SGD = N VND"), converts the total and splits to VND, and submits the converted values. `Expense.currency`, `originalAmount` and `fxRate` record what was actually entered (audit only; never used in balance math). The rate prefilled on the form is the `fxRate` of the most recently created foreign-currency expense, falling back to `DEFAULT_SGD_TO_VND`. Changing the rate affects only new expenses; existing ones keep the rate they were saved with.
+All stored amounts (`Expense.amount`, `Split.amount`) are VND (`BASE_CURRENCY` in `constants.ts`), so `src/lib/balance.ts` is currency-unaware and unchanged. The add form accepts VND or SGD (`CURRENCIES`). The SGD→VND rate is one global app setting, stored in the `Setting` table (key `sgdToVnd`, model `Setting`). It is shown and edited in `FxRateEditor` at the top of the home page (server action `setFxRate`); until someone sets it, `DEFAULT_SGD_TO_VND` applies. The add form shows the rate read-only (it links to the home page to change it), converts the SGD total and splits to VND, and submits the converted values. `Expense.currency`, `originalAmount` and `fxRate` record what was entered and the rate in force when it was saved (audit only; never used in balance math). Changing the global rate affects only expenses added afterwards; existing expenses keep their saved VND amounts.
 
 Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-GB` locale. Expense cards show the original amount (for example `SGD 100.00 @ 19500`) under the VND amount when `originalAmount` is set. The CSV export has per-member VND columns plus `Currency`, `Original Amount` and `FX Rate`.
 

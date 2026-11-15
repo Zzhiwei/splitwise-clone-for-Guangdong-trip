@@ -9,10 +9,9 @@ type SplitType = "equal" | "percentage" | "exact";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-export default function AddExpenseForm({ defaultRate }: { defaultRate: number }) {
+export default function AddExpenseForm({ rate }: { rate: number }) {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<Currency>(BASE_CURRENCY);
-  const [rate, setRate] = useState(String(defaultRate));
   const [splitType, setSplitType] = useState<SplitType>("equal");
   const [included, setIncluded] = useState<Record<string, boolean>>(
     Object.fromEntries(MEMBERS.map((m) => [m, true]))
@@ -26,7 +25,7 @@ export default function AddExpenseForm({ defaultRate }: { defaultRate: number })
   const [isPending, startTransition] = useTransition();
 
   const isForeign = currency !== BASE_CURRENCY;
-  const factor = isForeign ? parseFloat(rate) || 0 : 1;
+  const factor = isForeign ? rate : 1;
   const enteredTotalRaw = parseFloat(amount) || 0;
   const totalBase = round2(enteredTotalRaw * factor);
 
@@ -140,16 +139,12 @@ export default function AddExpenseForm({ defaultRate }: { defaultRate: number })
           />
           {isForeign && (
             <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-              <span>1 {currency} =</span>
-              <input
-                type="number"
-                step="any"
-                min="0"
-                value={rate}
-                onChange={(e) => setRate(e.target.value)}
-                className="w-28 border border-gray-300 rounded px-2 py-1 text-sm"
-              />
-              <span>{BASE_CURRENCY}</span>
+              <span>
+                1 {currency} = {rate.toLocaleString("en-US")} {BASE_CURRENCY}
+              </span>
+              <a href="/" className="text-indigo-600 hover:underline">
+                (change on home page)
+              </a>
               {totalBase > 0 && <span className="text-gray-400">≈ {formatVnd(totalBase)}</span>}
             </div>
           )}

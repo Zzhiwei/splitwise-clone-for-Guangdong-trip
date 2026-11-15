@@ -23,6 +23,12 @@ model Expense {
   splits     Split[]
 }
 
+// Global app settings (e.g. SGD->VND rate), key/value.
+model Setting {
+  key   String @id
+  value String
+}
+
 model Split {
   id        String  @id @default(cuid())
   expenseId String

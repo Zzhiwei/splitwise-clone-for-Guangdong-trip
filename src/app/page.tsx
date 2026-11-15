@@ -3,6 +3,8 @@ import { calculateNetBalances, simplifyDebts } from "@/lib/balance";
 import BalanceSummary from "@/components/BalanceSummary";
 import ExpenseList from "@/components/ExpenseList";
 import { TRIP_NAME } from "@/lib/constants";
+import { getFxRate } from "@/lib/fx";
+import FxRateEditor from "@/components/FxRateEditor";
 
 export default async function DashboardPage() {
   const expenses = await prisma.expense.findMany({
@@ -14,10 +16,12 @@ export default async function DashboardPage() {
   const net = calculateNetBalances(expenses);
   const transactions = simplifyDebts(net);
   const recent = expenses.slice(0, 20);
+  const fxRate = await getFxRate();
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">{TRIP_NAME}</h1>
+      <FxRateEditor rate={fxRate} />
       <BalanceSummary net={net} transactions={transactions} />
       <div>
         <div className="flex items-center justify-between mb-3">
