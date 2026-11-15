@@ -26,6 +26,7 @@ export default function ResolveButton({ id }: { id: string }) {
           <div className="bg-white rounded-2xl shadow-xl p-6 w-72 space-y-4">
             <p className="text-sm font-medium text-gray-800">Mark this expense as resolved?</p>
             <p className="text-xs text-gray-500">It will be removed from the active list.</p>
+            <p className="text-xs text-gray-500">All splits will also be marked as paid back.</p>
             <div className="flex gap-3 justify-end">
               <button
                 type="button"

@@ -19,7 +19,6 @@ model Expense {
   resolvedAt DateTime?
   currency       String  @default("VND")
   originalAmount Float?
-  fxRate         Float?
   splits     Split[]
 }
 

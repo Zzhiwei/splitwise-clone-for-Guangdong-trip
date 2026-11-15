@@ -70,7 +70,6 @@ export default function AddExpenseForm({ rate }: { rate: number }) {
     // Store VND; keep what was actually entered for the audit trail.
     formData.set("currency", currency);
     formData.set("originalAmount", String(enteredTotal));
-    formData.set("fxRate", String(factor));
     formData.set("amount", String(totalBase));
     startTransition(() => addExpense(formData));
   }

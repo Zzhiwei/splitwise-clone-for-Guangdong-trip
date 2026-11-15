@@ -8,7 +8,7 @@ type ExpenseWithSplits = Expense & { splits: Split[] };
 export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits[] }) {
   function handleExport() {
     const rows: string[][] = [
-      ["Date", "Title", "Paid By", "Total (VND)", "Split Type", ...MEMBERS.map((m) => `${m} (VND)`), "Currency", "Original Amount", "FX Rate"],
+      ["Date", "Title", "Paid By", "Total (VND)", "Split Type", ...MEMBERS.map((m) => `${m} (VND)`), "Currency", "Original Amount"],
     ];
 
     for (const expense of expenses) {
@@ -24,7 +24,6 @@ export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits
         ...MEMBERS.map((m) => splitMap[m] ?? ""),
         expense.currency,
         expense.originalAmount?.toFixed(2) ?? "",
-        expense.fxRate?.toString() ?? "",
       ]);
     }
 

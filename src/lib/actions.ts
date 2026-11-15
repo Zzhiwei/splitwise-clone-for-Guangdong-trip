@@ -30,9 +30,8 @@ export async function addExpense(formData: FormData) {
   }
   const isForeign = currency !== BASE_CURRENCY;
   const originalAmount = isForeign ? parseFloat(formData.get("originalAmount") as string) : null;
-  const fxRate = isForeign ? parseFloat(formData.get("fxRate") as string) : null;
-  if (isForeign && (!(originalAmount! > 0) || !(fxRate! > 0))) {
-    throw new Error("Invalid FX rate or original amount");
+  if (isForeign && !(originalAmount! > 0)) {
+    throw new Error("Invalid original amount");
   }
 
   const splitsRaw = formData.get("splits") as string;
@@ -52,7 +51,6 @@ export async function addExpense(formData: FormData) {
       splitType,
       currency,
       originalAmount,
-      fxRate,
       splits: {
         create: splits.map((sp) => ({ member: sp.member, amount: sp.amount })),
       },
@@ -85,7 +83,11 @@ export async function deleteExpense(id: string) {
 }
 
 export async function resolveExpense(id: string) {
-  await prisma.expense.update({ where: { id }, data: { resolvedAt: new Date() } });
+  // Resolving settles the expense, so every split counts as paid back.
+  await prisma.$transaction([
+    prisma.split.updateMany({ where: { expenseId: id }, data: { paidBack: true } }),
+    prisma.expense.update({ where: { id }, data: { resolvedAt: new Date() } }),
+  ]);
   revalidatePath("/");
   revalidatePath("/expenses");
   revalidatePath("/resolved-expenses");

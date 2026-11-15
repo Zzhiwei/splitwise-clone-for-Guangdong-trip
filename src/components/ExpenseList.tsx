@@ -56,9 +56,9 @@ export default function ExpenseList({ expenses, showResolve = true, showUnresolv
                 <span className="text-lg font-bold text-gray-900">
                   {formatVnd(expense.amount)}
                 </span>
-                {expense.originalAmount != null && expense.fxRate != null && (
+                {expense.originalAmount != null && (
                   <p className="text-xs text-gray-400">
-                    {expense.currency} {expense.originalAmount.toFixed(2)} @ {expense.fxRate}
+                    {expense.currency} {expense.originalAmount.toFixed(2)}
                   </p>
                 )}
               </div>

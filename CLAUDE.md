@@ -77,7 +77,7 @@ npx prisma generate                           # regenerate client after schema c
 
 Run `npm install` before any `npx prisma ...`. Without `node_modules`, `npx` downloads Prisma 8, which rejects `migrate deploy`.
 
-`migrate dev` needs a shadow database, which the Supabase `postgres` user may not be allowed to create. The `20261115120000_add_currency` and `20261115130000_add_setting` migrations were therefore written by hand (plain `ALTER TABLE ... ADD COLUMN` / `CREATE TABLE`, matching the `schema.prisma` change) and applied with `migrate deploy`. Do the same for future schema changes if `migrate dev` fails.
+`migrate dev` needs a shadow database, which the Supabase `postgres` user may not be allowed to create. The `20261115120000_add_currency`, `20261115130000_add_setting` and `20261115140000_drop_fx_rate` migrations were therefore written by hand (plain `ALTER TABLE` / `CREATE TABLE`, matching the `schema.prisma` change) and applied with `migrate deploy`. Do the same for future schema changes if `migrate dev` fails.
 
 If the generated client is stale after `prisma generate`, delete `src/generated/prisma/` entirely and re-run `npx prisma generate`.
 
@@ -99,7 +99,7 @@ npm test          # vitest, balance logic only (no DB needed)
 Both use nullable timestamp fields on `Expense` — rows are never hard-deleted.
 
 - `deletedAt` — set on delete. All active queries filter `where: { deletedAt: null }`.
-- `resolvedAt` — set when an expense is marked settled. Active queries also filter `where: { resolvedAt: null }`. Resolved expenses appear only on `/resolved-expenses`. Can be unresolved (set back to `null`) via the `Undo resolve` button on that page.
+- `resolvedAt` — set when an expense is marked settled. Active queries also filter `where: { resolvedAt: null }`. Resolved expenses appear only on `/resolved-expenses`. Resolving also sets `paidBack = true` on every split of the expense (in one transaction), and the resolve confirm modal says so. Can be unresolved (set back to `null`) via the `Undo resolve` button on that page; unresolving does not restore the splits' previous `paidBack` values.
 
 The dashboard balance calculations naturally exclude resolved expenses because they use the same filtered query.
 
@@ -111,15 +111,20 @@ Balance logic in `calculateNetBalances`: if `paidBack = true`, the payer is debi
 
 ## Currency
 
-All stored amounts (`Expense.amount`, `Split.amount`) are VND (`BASE_CURRENCY` in `constants.ts`), so `src/lib/balance.ts` is currency-unaware and unchanged. The add form accepts VND or SGD (`CURRENCIES`). The SGD→VND rate is one global app setting, stored in the `Setting` table (key `sgdToVnd`, model `Setting`). It is shown and edited in `FxRateEditor` at the top of the home page (server action `setFxRate`); until someone sets it, `DEFAULT_SGD_TO_VND` applies. The add form shows the rate read-only (it links to the home page to change it), converts the SGD total and splits to VND, and submits the converted values. `Expense.currency`, `originalAmount` and `fxRate` record what was entered and the rate in force when it was saved (audit only; never used in balance math). Changing the global rate affects only expenses added afterwards; existing expenses keep their saved VND amounts.
+All stored amounts (`Expense.amount`, `Split.amount`) are VND (`BASE_CURRENCY` in `constants.ts`), so `src/lib/balance.ts` is currency-unaware and unchanged. The add form accepts VND or SGD (`CURRENCIES`). The SGD→VND rate is one global app setting, stored in the `Setting` table (key `sgdToVnd`, model `Setting`). It is shown and edited in `FxRateEditor` at the top of the home page (server action `setFxRate`); until someone sets it, `DEFAULT_SGD_TO_VND` applies. The add form shows the rate read-only (it links to the home page to change it), converts the SGD total and splits to VND, and submits the converted values. `Expense.currency` and `originalAmount` record what was entered (audit only; never used in balance math). Expenses do not store the FX rate. Changing the global rate affects only expenses added afterwards; existing expenses keep their saved VND amounts.
 
-Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-GB` locale. Expense cards show the original amount (for example `SGD 100.00 @ 19500`) under the VND amount when `originalAmount` is set. The CSV export has per-member VND columns plus `Currency`, `Original Amount` and `FX Rate`.
+Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-GB` locale. Expense cards show the original amount (for example `SGD 100.00`) under the VND amount when `originalAmount` is set. The CSV export has per-member VND columns plus `Currency` and `Original Amount`.
 
 ## Split types
 
 - `equal` — total divided evenly; rounding remainder goes to last person
 - `percentage` — per-member percentage (must sum to 100%)
 - `exact` — per-member amounts (must sum within ±0.02 of total). On the form they are typed in the selected currency; each is converted to VND and the last member's share absorbs rounding so the splits sum to the converted total
+
+## Known limitations
+
+- Money columns are `Float` (double precision). This is accurate enough for trip amounts: balances are rounded to 0.01 and split sums allow ±0.02. The one visible effect is 1 đồng display rounding, since VND is stored with 2 decimals but shown as whole đồng, so the displayed splits of an expense can differ from its displayed total by a few đồng. Switching to integer VND would mean changing `balance.ts` and the split code, so it was deliberately not done.
+- Changing the global FX rate never revalues existing expenses.
 
 ## Deployment
 
