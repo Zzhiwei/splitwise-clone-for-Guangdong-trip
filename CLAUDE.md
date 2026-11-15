@@ -123,7 +123,7 @@ Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-G
 
 ## Daily CSV export (Supabase Edge Function)
 
-`supabase/functions/export-expenses/index.ts` is a Deno Edge Function (excluded from the Next typecheck in `tsconfig.json`). It reads all non-deleted expenses (active and resolved, with a `Status` column), builds the same CSV columns as `ExportButton`, and uploads `expenses-YYYY-MM-DD.csv` to the private Storage bucket `expense-exports` (one file per day, same-day reruns overwrite). It returns early unless the current date in `Asia/Ho_Chi_Minh` is inside `WINDOW` (2026-11-19 to 2026-11-26) and requires the `x-cron-secret` header to equal the `EXPORT_CRON_SECRET` function secret. `MEMBERS` is duplicated inside the function (Deno cannot import from `src/`); update both when members change.
+`supabase/functions/export-expenses/index.ts` is a Deno Edge Function (excluded from the Next typecheck in `tsconfig.json`). It reads all non-deleted expenses (active and resolved, with a `Status` column), builds the same CSV columns as `ExportButton`, and uploads `expenses-YYYY-MM-DD.csv` to the private Storage bucket `expense-exports` (one file per day, same-day reruns overwrite). It returns early unless the current date in `Asia/Ho_Chi_Minh` is inside `WINDOW` (2026-11-19 to 2026-11-26) and requires the `x-cron-secret` header to equal the `EXPORT_CRON_SECRET` function secret. `MEMBERS` is duplicated inside the function (Deno cannot import from `src/`); update both when members change. Both this function and `ExportButton` prefix any CSV cell starting with `=`, `+`, `-`, `@`, tab or CR with `'` so spreadsheets treat user text (titles, names) as text instead of running it as a formula; keep that in any new CSV code.
 
 `supabase/setup-export-cron.sql` creates the bucket and schedules `pg_cron` job `export-expenses-daily` (`59 16 19-26 11 *` UTC = 23:59 Vietnam time, 19-26 November) which calls the function through `pg_net`, reading the secret from Vault. `pg_cron` has no year field, so unschedule the job after the trip (`select cron.unschedule('export-expenses-daily');`).
 
@@ -135,6 +135,14 @@ If you need to redo it (the Supabase CLI keeps local state in `supabase/.temp/`,
 - Inspect a run: `select status_code, content from net._http_response order by created desc limit 5;` and `select * from cron.job_run_details order by start_time desc limit 5;`.
 - After the trip: `select cron.unschedule('export-expenses-daily');`.
 
+## Region and latency
+
+The Supabase project is in `ap-southeast-2` (Sydney); the trip is in Vietnam. Supabase cannot change a project's region. Moving to Singapore was first judged not worth it (about 80-100 ms per page), but the plan below reverses that. What matters more is the Vercel function region: it should be close to the DB (`syd1`), otherwise every query crosses an ocean and a page with 2 sequential queries pays that twice. Check Vercel → Project Settings → Functions → Region, or set `"regions": ["syd1"]` in `vercel.json` (not present in the repo yet).
+
+Measured on 2026-11-15: `curl -sI https://splitwize-vietnam.vercel.app/login | grep -i x-vercel-id` returned `sin1::iad1::...`. The first code is the edge, the second is the function region, so the functions ran in `iad1` (US East) against the Sydney DB, which explains pages taking about 2 s. Setting the region has not been done yet. Request flow diagrams are in `diagrams.md`.
+
+Planned: move to a new Supabase project in `ap-southeast-1` (Singapore), since a project's region cannot be changed. Steps: create the project, run `npx prisma migrate deploy`, copy the data (including the `Setting` row), update `DATABASE_URL` on Vercel, set the Vercel function region to `sin1`, then redo the export function, secret, Vault entry and cron job on the new project and update the project ref in this file. This has not been done yet.
+
 ## Known limitations
 
 - Money columns are `Float` (double precision). This is accurate enough for trip amounts: balances are rounded to 0.01 and split sums allow ±0.02. The one visible effect is 1 đồng display rounding, since VND is stored with 2 decimals but shown as whole đồng, so the displayed splits of an expense can differ from its displayed total by a few đồng. Switching to integer VND would mean changing `balance.ts` and the split code, so it was deliberately not done.
@@ -142,4 +150,4 @@ If you need to redo it (the Supabase CLI keeps local state in `supabase/.temp/`,
 
 ## Deployment
 
-Hosted on Vercel. Set `DATABASE_URL`, `DIRECT_URL`, and `APP_PASSWORD` in Vercel environment variables. Local dev and production share one database, so migrations applied locally are already live; no separate `migrate deploy` is needed unless you add another environment.
+Hosted on Vercel. Set `DATABASE_URL` and `APP_PASSWORD` in Vercel environment variables. `DIRECT_URL` is not needed there: only the Prisma CLI reads it (migrations run from a dev machine), and the Vercel build only runs `prisma generate`, which does not connect to the DB. Local dev and production share one database, so migrations applied locally are already live; no separate `migrate deploy` is needed unless you add another environment.
