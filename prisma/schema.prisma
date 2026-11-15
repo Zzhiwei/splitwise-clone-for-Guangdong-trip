@@ -17,6 +17,9 @@ model Expense {
   splitType String
   deletedAt  DateTime?
   resolvedAt DateTime?
+  currency       String  @default("VND")
+  originalAmount Float?
+  fxRate         Float?
   splits     Split[]
 }
 

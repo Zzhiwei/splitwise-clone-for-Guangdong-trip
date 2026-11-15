@@ -2,6 +2,7 @@
 
 import { toggleSplitPaidBack } from "@/lib/actions";
 import { useTransition } from "react";
+import { formatVnd } from "@/lib/format";
 
 interface Props {
   splitId: string;
@@ -27,13 +28,13 @@ export default function SplitRow({ splitId, member, amount, paidBack, paidBy }: 
     >
       <span className="text-xs text-gray-500">{member}</span>
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-gray-400">¥{amount.toFixed(2)}</span>
+        <span className="text-xs text-gray-400">{formatVnd(amount)}</span>
         {isOwn ? (
-          <span className="text-xs text-indigo-400">付款人</span>
+          <span className="text-xs text-indigo-400">Payer</span>
         ) : paidBack ? (
-          <span className="text-xs text-green-500">✓ 已还</span>
+          <span className="text-xs text-green-500">✓ Paid back</span>
         ) : (
-          <span className="text-xs text-gray-300">○ 未还</span>
+          <span className="text-xs text-gray-300">○ Unpaid</span>
         )}
       </div>
     </div>

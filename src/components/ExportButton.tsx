@@ -1,13 +1,14 @@
 "use client";
 
 import type { Expense, Split } from "@/generated/prisma/client";
+import { MEMBERS } from "@/lib/constants";
 
 type ExpenseWithSplits = Expense & { splits: Split[] };
 
 export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits[] }) {
   function handleExport() {
     const rows: string[][] = [
-      ["Date", "Title", "Paid By", "Total (¥)", "Split Type", "Zhiwei (¥)", "Lin Chen (¥)", "Bojun (¥)", "Haozhe (¥)"],
+      ["Date", "Title", "Paid By", "Total (VND)", "Split Type", ...MEMBERS.map((m) => `${m} (VND)`), "Currency", "Original Amount", "FX Rate"],
     ];
 
     for (const expense of expenses) {
@@ -15,15 +16,15 @@ export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits
         expense.splits.map((s) => [s.member, s.amount.toFixed(2)])
       );
       rows.push([
-        new Date(expense.date).toLocaleDateString("zh-CN"),
+        new Date(expense.date).toLocaleDateString("en-GB"),
         expense.title,
         expense.paidBy,
         expense.amount.toFixed(2),
         expense.splitType,
-        splitMap["Zhiwei"] ?? "",
-        splitMap["Lin Chen"] ?? "",
-        splitMap["Bojun"] ?? "",
-        splitMap["Haozhe"] ?? "",
+        ...MEMBERS.map((m) => splitMap[m] ?? ""),
+        expense.currency,
+        expense.originalAmount?.toFixed(2) ?? "",
+        expense.fxRate?.toString() ?? "",
       ]);
     }
 
@@ -45,7 +46,7 @@ export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits
       onClick={handleExport}
       className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors"
     >
-      导出 CSV
+      Export CSV
     </button>
   );
 }

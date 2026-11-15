@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Splitwize",
-  description: "Guangdong trip expense splitter",
+  description: "Vietnam trip expense splitter",
 };
 
 export default function RootLayout({

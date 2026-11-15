@@ -18,14 +18,14 @@ export default function ResolveButton({ id }: { id: string }) {
         onClick={() => setShowConfirm(true)}
         className="text-xs text-green-500 hover:text-green-700"
       >
-        结清
+        Resolve
       </button>
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-72 space-y-4">
-            <p className="text-sm font-medium text-gray-800">确认将这笔账单标记为已结清？</p>
-            <p className="text-xs text-gray-500">结清后将从账单列表中移除。</p>
+            <p className="text-sm font-medium text-gray-800">Mark this expense as resolved?</p>
+            <p className="text-xs text-gray-500">It will be removed from the active list.</p>
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
@@ -33,7 +33,7 @@ export default function ResolveButton({ id }: { id: string }) {
                 onClick={() => setShowConfirm(false)}
                 className="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
               >
-                取消
+                Cancel
               </button>
               <button
                 type="button"
@@ -47,7 +47,7 @@ export default function ResolveButton({ id }: { id: string }) {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                   </svg>
                 )}
-                {isPending ? "结清中…" : "确认结清"}
+                {isPending ? "Resolving…" : "Confirm resolve"}
               </button>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { prisma } from "./db";
-import { MEMBERS } from "./constants";
+import { MEMBERS, BASE_CURRENCY, CURRENCIES, type Currency } from "./constants";
 
 interface SplitInput {
   member: string;
@@ -22,6 +22,18 @@ export async function addExpense(formData: FormData) {
     throw new Error("Invalid paidBy");
   }
 
+  // amount/splits arrive already converted to the base currency (VND); these are audit fields.
+  const currency = ((formData.get("currency") as string) || BASE_CURRENCY) as Currency;
+  if (!CURRENCIES.includes(currency)) {
+    throw new Error("Invalid currency");
+  }
+  const isForeign = currency !== BASE_CURRENCY;
+  const originalAmount = isForeign ? parseFloat(formData.get("originalAmount") as string) : null;
+  const fxRate = isForeign ? parseFloat(formData.get("fxRate") as string) : null;
+  if (isForeign && (!(originalAmount! > 0) || !(fxRate! > 0))) {
+    throw new Error("Invalid FX rate or original amount");
+  }
+
   const splitsRaw = formData.get("splits") as string;
   const splits: SplitInput[] = JSON.parse(splitsRaw);
 
@@ -37,6 +49,9 @@ export async function addExpense(formData: FormData) {
       paidBy,
       date: new Date(date),
       splitType,
+      currency,
+      originalAmount,
+      fxRate,
       splits: {
         create: splits.map((sp) => ({ member: sp.member, amount: sp.amount })),
       },
@@ -77,7 +92,7 @@ export async function toggleSplitPaidBack(splitId: string, paidBack: boolean) {
 
 export async function verifyPassword(password: string): Promise<{ error: string } | void> {
   if (password !== process.env.APP_PASSWORD) {
-    return { error: "密码错误" };
+    return { error: "Wrong password" };
   }
   cookies().set("splitwize_auth", "ok", {
     httpOnly: true,

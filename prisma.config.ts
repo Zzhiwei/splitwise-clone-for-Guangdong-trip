@@ -7,7 +7,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"]!,
-    ...(process.env["DIRECT_URL"] && { directUrl: process.env["DIRECT_URL"] }),
+    // Prisma CLI (migrate) needs a non-transaction-pooled connection; Supabase's 6543 pooler breaks it.
+    url: (process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"])!,
   },
 });

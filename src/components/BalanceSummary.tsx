@@ -1,4 +1,5 @@
 import type { NetBalance, Transaction } from "@/lib/balance";
+import { formatVnd } from "@/lib/format";
 
 interface Props {
   net: NetBalance;
@@ -9,7 +10,7 @@ export default function BalanceSummary({ net, transactions }: Props) {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">余额</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Balances</h2>
         <div className="grid grid-cols-2 gap-3">
           {Object.entries(net).map(([member, amount]) => (
             <div
@@ -27,7 +28,7 @@ export default function BalanceSummary({ net, transactions }: Props) {
                 }`}
               >
                 {amount > 0 ? "+" : ""}
-                {amount.toFixed(2)} ¥
+                {formatVnd(amount)}
               </span>
             </div>
           ))}
@@ -35,9 +36,9 @@ export default function BalanceSummary({ net, transactions }: Props) {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">还款建议</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Suggested settle-up</h2>
         {transactions.length === 0 ? (
-          <p className="text-gray-500 text-sm">大家已经结清啦 🎉</p>
+          <p className="text-gray-500 text-sm">Everyone is settled up 🎉</p>
         ) : (
           <ul className="space-y-2">
             {transactions.map((t, i) => (
@@ -46,7 +47,7 @@ export default function BalanceSummary({ net, transactions }: Props) {
                 <span className="text-gray-400">→</span>
                 <span className="font-medium text-green-600">{t.to}</span>
                 <span className="ml-auto font-bold text-gray-800">
-                  ¥{t.amount.toFixed(2)}
+                  {formatVnd(t.amount)}
                 </span>
               </li>
             ))}

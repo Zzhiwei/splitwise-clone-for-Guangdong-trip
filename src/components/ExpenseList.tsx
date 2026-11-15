@@ -3,6 +3,7 @@ import DeleteButton from "./DeleteButton";
 import ResolveButton from "./ResolveButton";
 import UnresolveButton from "./UnresolveButton";
 import SplitRow from "./SplitRow";
+import { formatVnd } from "@/lib/format";
 
 type ExpenseWithSplits = Expense & { splits: (Split & { paidBack: boolean })[] };
 
@@ -16,7 +17,7 @@ export default function ExpenseList({ expenses, showResolve = true, showUnresolv
   if (expenses.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500">
-        暂无账单。
+        No expenses yet.
       </div>
     );
   }
@@ -32,10 +33,10 @@ export default function ExpenseList({ expenses, showResolve = true, showUnresolv
             <div>
               <p className="font-semibold text-gray-900">{expense.title}</p>
               <p className="text-sm text-gray-500">
-                付款人：{" "}
+                Paid by:{" "}
                 <span className="font-medium text-gray-700">{expense.paidBy}</span>
                 {" · "}
-                {new Date(expense.date).toLocaleDateString("zh-CN")}
+                {new Date(expense.date).toLocaleDateString("en-GB")}
               </p>
               <div className="mt-2 space-y-0.5">
                 {expense.splits.map((s) => (
@@ -51,9 +52,16 @@ export default function ExpenseList({ expenses, showResolve = true, showUnresolv
               </div>
             </div>
             <div className="flex items-center gap-3 ml-4 shrink-0">
-              <span className="text-lg font-bold text-gray-900">
-                ¥{expense.amount.toFixed(2)}
-              </span>
+              <div className="text-right">
+                <span className="text-lg font-bold text-gray-900">
+                  {formatVnd(expense.amount)}
+                </span>
+                {expense.originalAmount != null && expense.fxRate != null && (
+                  <p className="text-xs text-gray-400">
+                    {expense.currency} {expense.originalAmount.toFixed(2)} @ {expense.fxRate}
+                  </p>
+                )}
+              </div>
               {showResolve && <ResolveButton id={expense.id} />}
               {showUnresolve && <UnresolveButton id={expense.id} />}
               <DeleteButton id={expense.id} />

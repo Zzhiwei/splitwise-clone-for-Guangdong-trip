@@ -1,38 +1,43 @@
 # Splitwize
 
-Lightweight Splitwise clone for a 4-person Guangdong trip. Password-protected (shared secret). UI is in Chinese.
+Lightweight Splitwise clone for a group trip (currently the Vietnam trip, 5 people; previously Guangdong). Password-protected (shared secret). UI is in English.
 
 ## Stack
 
 - **Next.js 14** (App Router, TypeScript, `src/` layout)
 - **Tailwind CSS** — no component libraries
 - **Prisma v7** with `@prisma/adapter-pg` driver adapter (required for Prisma 7)
-- **Neon Postgres** (remote only — no local DB; `.env` points directly to Neon)
+- **Supabase Postgres** (remote only — no local DB; `.env` points directly to Supabase)
 - **Next.js Server Actions** for all mutations
 - **Vercel** for deployment
 
 ## Members
 
-Defined in `src/lib/constants.ts`: `["Zhiwei", "Lin Chen", "Bojun", "Haozhe"]`
+Defined in `src/lib/constants.ts` (`MEMBERS`, plus `TRIP_NAME`). To add/remove members, update `MEMBERS` there; `ExportButton` and the add form read it. `balance.test.ts` mocks `./constants` with the original 4 Guangdong members so its fixtures stay valid when `MEMBERS` changes.
 
-To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns are hardcoded to match — update those too.
+Data recorded under a member who is no longer in `MEMBERS` breaks `calculateNetBalances` (it produces a `NaN` balance), so clear or archive old-trip data when changing members.
+
+`src/app/profile-pics/` holds one PNG per current member (named after them). The images are not referenced by any code yet.
 
 ## Key files
 
 | File | Purpose |
 |---|---|
 | `prisma/schema.prisma` | Data model |
-| `prisma.config.ts` | Prisma CLI config — reads `DATABASE_URL` / `DIRECT_URL` from `.env` |
+| `prisma.config.ts` | Prisma CLI config — uses `DIRECT_URL` (falls back to `DATABASE_URL`) from `.env` |
 | `src/lib/db.ts` | Prisma singleton using `PrismaPg` adapter |
 | `src/middleware.ts` | Auth gate — redirects to `/login` if `splitwize_auth` cookie absent |
 | `src/app/login/page.tsx` | Full-screen password entry page |
 | `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense`, `resolveExpense`, `unresolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
-| `src/lib/balance.ts` | `calculateNetBalances` + `simplifyDebts` (greedy two-pointer) |
-| `src/lib/constants.ts` | `MEMBERS` array |
+| `src/lib/balance.ts` | `calculateNetBalances` + `simplifyDebts` (greedy two-pointer). Currency-unaware; keep changes here minimal, it was validated on a real trip |
+| `src/lib/balance.test.ts` | Vitest cases for the balance logic (`npm test`) |
+| `src/lib/constants.ts` | `MEMBERS`, `TRIP_NAME`, `BASE_CURRENCY`, `CURRENCIES`, `DEFAULT_SGD_TO_VND` |
 | `src/app/page.tsx` | Dashboard — balances + last 20 expenses (excludes resolved) |
 | `src/app/expenses/page.tsx` | Active expense history + CSV export |
 | `src/app/resolved-expenses/page.tsx` | Resolved/settled expenses archive |
-| `src/app/add/page.tsx` | Add expense form (client component) |
+| `src/app/add/page.tsx` | Server wrapper for the add form; looks up the last-used FX rate |
+| `src/components/AddExpenseForm.tsx` | Add expense form (client component); converts to VND before submit |
+| `src/lib/format.ts` | `formatVnd` (whole đồng, thousands separators, ₫ prefix). Used by every money display |
 | `src/components/DeleteButton.tsx` | Confirm modal + soft-delete action |
 | `src/components/ResolveButton.tsx` | Confirm modal + resolve action |
 | `src/components/UnresolveButton.tsx` | Confirm modal + unresolve action |
@@ -42,22 +47,34 @@ To add/remove members, update `MEMBERS` there. The `ExportButton` CSV columns ar
 
 ## Database
 
-**There is no local DB.** All Prisma operations (migrations, queries) run against the remote Neon instance.
+**There is no local DB.** All Prisma operations (migrations, queries) run against the remote Supabase project.
 
 `.env` needs:
 ```
-DATABASE_URL=postgresql://...   # pooled connection (runtime)
-DIRECT_URL=postgresql://...     # direct connection (migrations)
+DATABASE_URL=postgresql://...   # Supabase transaction pooler, port 6543 (runtime)
+DIRECT_URL=postgresql://...     # Supabase session pooler, port 5432 (migrations)
 APP_PASSWORD=...                # shared password for the auth gate
 ```
+
+Connection string rules:
+- Use the pooler host (`aws-...pooler.supabase.com`) with user `postgres.<project-ref>`. The direct host `db.<ref>.supabase.co` is IPv6-only and often unreachable, so do not use it for `DIRECT_URL`.
+- Remove the `[ ]` around `[YOUR-PASSWORD]` and URL-encode special characters in the password (`&` → `%26`, `?` → `%3F`, `@` → `%40`, `#` → `%23`). An alphanumeric password avoids this.
+- Do not add `?pgbouncer=true`. That flag is for Prisma's old engine; the `pg` driver does not need it.
+- The Prisma CLI must not run through the 6543 transaction pooler, which is why `prisma.config.ts` prefers `DIRECT_URL`.
+
+On a network that blocks Postgres (for example behind a corporate proxy), TCP connects but the handshake hangs and Prisma reports `P1001`. Either switch networks or tunnel the DB ports through an HTTP `CONNECT` proxy; `pg` and Prisma have no built-in proxy support.
 
 ### Migrations
 
 ```bash
-npx prisma migrate dev --name <description>   # creates + applies migration to Neon
+npx prisma migrate dev --name <description>   # creates + applies migration to Supabase
 npx prisma migrate deploy                     # apply in production (Vercel build)
 npx prisma generate                           # regenerate client after schema changes
 ```
+
+Run `npm install` before any `npx prisma ...`. Without `node_modules`, `npx` downloads Prisma 8, which rejects `migrate deploy`.
+
+`migrate dev` needs a shadow database, which the Supabase `postgres` user may not be allowed to create. The `20261115120000_add_currency` migration was therefore written by hand (plain `ALTER TABLE ... ADD COLUMN`, matching the `schema.prisma` change) and applied with `migrate deploy`. Do the same for future schema changes if `migrate dev` fails.
 
 If the generated client is stale after `prisma generate`, delete `src/generated/prisma/` entirely and re-run `npx prisma generate`.
 
@@ -67,6 +84,7 @@ If the generated client is stale after `prisma generate`, delete `src/generated/
 npm run dev       # starts on :3000
 npm run build     # production build
 npm run lint
+npm test          # vitest, balance logic only (no DB needed)
 ```
 
 ## Auth
@@ -78,7 +96,7 @@ npm run lint
 Both use nullable timestamp fields on `Expense` — rows are never hard-deleted.
 
 - `deletedAt` — set on delete. All active queries filter `where: { deletedAt: null }`.
-- `resolvedAt` — set when an expense is marked settled. Active queries also filter `where: { resolvedAt: null }`. Resolved expenses appear only on `/resolved-expenses`. Can be unresolved (set back to `null`) via the `撤销结清` button on that page.
+- `resolvedAt` — set when an expense is marked settled. Active queries also filter `where: { resolvedAt: null }`. Resolved expenses appear only on `/resolved-expenses`. Can be unresolved (set back to `null`) via the `Undo resolve` button on that page.
 
 The dashboard balance calculations naturally exclude resolved expenses because they use the same filtered query.
 
@@ -88,11 +106,17 @@ The dashboard balance calculations naturally exclude resolved expenses because t
 
 Balance logic in `calculateNetBalances`: if `paidBack = true`, the payer is debited that split's amount (money already received); if `false`, the member is debited as usual. This means marking splits as paid-back reduces the payer's net positive and zeroes out the member's debt without requiring a separate expense.
 
+## Currency
+
+All stored amounts (`Expense.amount`, `Split.amount`) are VND (`BASE_CURRENCY` in `constants.ts`), so `src/lib/balance.ts` is currency-unaware and unchanged. The add form accepts VND or SGD (`CURRENCIES`). For SGD it shows one editable rate field ("1 SGD = N VND"), converts the total and splits to VND, and submits the converted values. `Expense.currency`, `originalAmount` and `fxRate` record what was actually entered (audit only; never used in balance math). The rate prefilled on the form is the `fxRate` of the most recently created foreign-currency expense, falling back to `DEFAULT_SGD_TO_VND`. Changing the rate affects only new expenses; existing ones keep the rate they were saved with.
+
+Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-GB` locale. Expense cards show the original amount (for example `SGD 100.00 @ 19500`) under the VND amount when `originalAmount` is set. The CSV export has per-member VND columns plus `Currency`, `Original Amount` and `FX Rate`.
+
 ## Split types
 
 - `equal` — total divided evenly; rounding remainder goes to last person
 - `percentage` — per-member percentage (must sum to 100%)
-- `exact` — per-member amounts (must sum within ±0.02 of total)
+- `exact` — per-member amounts (must sum within ±0.02 of total). On the form they are typed in the selected currency; each is converted to VND and the last member's share absorbs rounding so the splits sum to the converted total
 
 ## Deployment
 

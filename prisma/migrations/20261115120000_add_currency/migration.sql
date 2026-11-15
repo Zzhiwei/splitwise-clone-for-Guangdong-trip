@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Expense" ADD COLUMN     "currency" TEXT NOT NULL DEFAULT 'VND',
+ADD COLUMN     "fxRate" DOUBLE PRECISION,
+ADD COLUMN     "originalAmount" DOUBLE PRECISION;

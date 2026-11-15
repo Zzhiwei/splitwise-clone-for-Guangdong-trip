@@ -22,13 +22,13 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-xl p-8 w-80 space-y-5">
         <div className="text-center">
           <p className="text-2xl font-bold text-indigo-600">Splitwize</p>
-          <p className="text-sm text-gray-500 mt-1">广东之旅</p>
+          <p className="text-sm text-gray-500 mt-1">Vietnam Trip</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              密码
+              Password
             </label>
             <input
               type="password"
@@ -37,7 +37,7 @@ export default function LoginPage() {
               required
               autoFocus
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="请输入密码"
+              placeholder="Enter password"
             />
           </div>
 
@@ -56,7 +56,7 @@ export default function LoginPage() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
             )}
-            {isPending ? "验证中…" : "进入"}
+            {isPending ? "Verifying…" : "Enter"}
           </button>
         </form>
       </div>

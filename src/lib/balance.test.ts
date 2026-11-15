@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { calculateNetBalances, simplifyDebts } from "./balance";
+
+// These cases were validated on the Guangdong trip with these 4 members; pin them
+// so the real MEMBERS list can change per trip without touching the test fixtures.
+vi.mock("./constants", () => ({
+  MEMBERS: ["Zhiwei", "Lin Chen", "Bojun", "Haozhe"],
+}));
 
 // Minimal shape that satisfies the function signatures (no Prisma import needed)
 function expense(

@@ -9,19 +9,19 @@ export default function Nav() {
         </Link>
         <div className="flex gap-4 text-sm">
           <Link href="/" className="text-gray-600 hover:text-indigo-600">
-            首页
+            Home
           </Link>
           <Link href="/expenses" className="text-gray-600 hover:text-indigo-600">
-            账单
+            Expenses
           </Link>
           <Link href="/resolved-expenses" className="text-gray-600 hover:text-indigo-600">
-            已结清
+            Resolved
           </Link>
           <Link
             href="/add"
             className="bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700"
           >
-            + 记账
+            + Add
           </Link>
         </div>
       </div>

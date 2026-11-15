@@ -11,8 +11,8 @@ export default async function ResolvedExpensesPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">已结清账单</h1>
-        <p className="text-sm text-gray-500 mt-0.5">共 {expenses.length} 笔</p>
+        <h1 className="text-2xl font-bold text-gray-900">Resolved expenses</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{expenses.length} expenses</p>
       </div>
       <ExpenseList expenses={expenses} showResolve={false} showUnresolve={true} />
     </div>
