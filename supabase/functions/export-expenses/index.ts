@@ -21,7 +21,11 @@ type Expense = {
   Split: Split[];
 };
 
-const q = (cell: string) => `"${cell.replace(/"/g, '""')}"`;
+// Prefix formula-leading characters so spreadsheets treat user text (title, names) as text, not a formula.
+const q = (cell: string) => {
+  const safe = /^[=+\-@\t\r]/.test(cell) ? `'${cell}` : cell;
+  return `"${safe.replace(/"/g, '""')}"`;
+};
 
 function toCsv(expenses: Expense[]): string {
   const rows: string[][] = [

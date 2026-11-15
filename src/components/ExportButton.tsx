@@ -28,7 +28,15 @@ export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits
     }
 
     const csv = rows
-      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","))
+      .map((row) =>
+        row
+          .map((cell) => {
+            // Neutralize spreadsheet formulas in user text (title, names).
+            const safe = /^[=+\-@\t\r]/.test(cell) ? `'${cell}` : cell;
+            return `"${safe.replace(/"/g, '""')}"`;
+          })
+          .join(",")
+      )
       .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
