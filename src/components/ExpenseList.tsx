@@ -20,6 +20,10 @@ interface Props {
   showUnresolve?: boolean;
 }
 
+// Payer first, then unpaid, then paid back. Array.sort is stable, so ties keep stored order.
+const splitRank = (s: { member: string; paidBack: boolean }, paidBy: string) =>
+  s.member === paidBy ? 0 : s.paidBack ? 2 : 1;
+
 export default function ExpenseList({ expenses, currency, showResolve = true, showUnresolve = false }: Props) {
   if (expenses.length === 0) {
     return (
@@ -58,7 +62,9 @@ export default function ExpenseList({ expenses, currency, showResolve = true, sh
             </div>
           </div>
           <div className="mt-2 divide-y divide-hairline">
-            {expense.splits.map((s) => (
+            {[...expense.splits]
+              .sort((a, b) => splitRank(a, expense.paidBy) - splitRank(b, expense.paidBy))
+              .map((s) => (
               <SplitRow
                 key={s.id}
                 splitId={s.id}
