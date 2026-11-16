@@ -2,7 +2,8 @@
 
 import { toggleSplitPaidBack } from "@/lib/actions";
 import { useTransition } from "react";
-import { formatVnd } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
+import type { Currency } from "@/lib/constants";
 
 interface Props {
   splitId: string;
@@ -10,9 +11,10 @@ interface Props {
   amount: number;
   paidBack: boolean;
   paidBy: string;
+  currency: Currency;
 }
 
-export default function SplitRow({ splitId, member, amount, paidBack, paidBy }: Props) {
+export default function SplitRow({ splitId, member, amount, paidBack, paidBy, currency }: Props) {
   const [isPending, startTransition] = useTransition();
   const isOwn = member === paidBy;
 
@@ -28,7 +30,7 @@ export default function SplitRow({ splitId, member, amount, paidBack, paidBy }: 
     >
       <span className="text-xs text-gray-500">{member}</span>
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-gray-400">{formatVnd(amount)}</span>
+        <span className="text-xs text-gray-400">{formatMoney(amount, currency)}</span>
         {isOwn ? (
           <span className="text-xs text-indigo-400">Payer</span>
         ) : paidBack ? (

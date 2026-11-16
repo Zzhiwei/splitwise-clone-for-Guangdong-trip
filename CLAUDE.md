@@ -28,19 +28,22 @@ Data recorded under a member who is no longer in `MEMBERS` breaks `calculateNetB
 | `src/lib/db.ts` | Prisma singleton using `PrismaPg` adapter |
 | `src/middleware.ts` | Auth gate — redirects to `/login` if `splitwize_auth` cookie absent |
 | `src/app/login/page.tsx` | Full-screen password entry page |
-| `src/lib/actions.ts` | Server Actions: `addExpense`, `deleteExpense`, `resolveExpense`, `unresolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
+| `src/lib/actions.ts` | Server Actions: `addExpense`, `setFxRate`, `setDisplayCurrency`, `deleteExpense`, `resolveExpense`, `unresolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
 | `src/lib/balance.ts` | `calculateNetBalances` + `simplifyDebts` (greedy two-pointer). Currency-unaware; keep changes here minimal, it was validated on a real trip |
 | `src/lib/balance.test.ts` | Vitest cases for the balance logic (`npm test`) |
-| `src/lib/constants.ts` | `MEMBERS`, `TRIP_NAME`, `BASE_CURRENCY`, `CURRENCIES`, `DEFAULT_SGD_TO_VND` |
+| `src/lib/constants.ts` | `MEMBERS`, `TRIP_NAME`, `BASE_CURRENCY` (default display/entry currency), `CURRENCIES`, `DEFAULT_SGD_TO_VND` |
+| `src/lib/currency.ts` | `convert`, `convertExpenses`: converts expenses to the display currency before balance calculation |
+| `src/lib/display-currency.ts` | `getDisplayCurrency` reads the per-browser `splitwize_currency` cookie |
+| `src/components/CurrencyToggle.tsx` | VND/SGD display toggle in the nav (calls `setDisplayCurrency`) |
 | `src/app/page.tsx` | Dashboard — balances + last 20 expenses (excludes resolved) |
 | `src/app/expenses/page.tsx` | Active expense history + CSV export |
 | `src/app/resolved-expenses/page.tsx` | Resolved/settled expenses archive |
 | `src/app/add/page.tsx` | Server wrapper for the add form; looks up the last-used FX rate |
-| `src/components/AddExpenseForm.tsx` | Add expense form (client component); converts to VND before submit |
+| `src/components/AddExpenseForm.tsx` | Add expense form (client component); submits amounts in the chosen currency, no conversion |
 | `src/lib/fx.ts` | `getFxRate` — reads the global SGD→VND rate from the `Setting` table, falling back to `DEFAULT_SGD_TO_VND` |
 | `src/components/FxRateEditor.tsx` | Rate display + edit control at the top of the home page (calls `setFxRate`) |
 | `src/components/Avatar.tsx` | Member profile picture from `public/profile-pics/` |
-| `src/lib/format.ts` | `formatVnd` (whole đồng, thousands separators, ₫ prefix). Used by every money display |
+| `src/lib/format.ts` | `formatMoney(n, currency)`: whole đồng with ₫ for VND, 2 decimals with S$ for SGD. Used by every money display |
 | `src/components/DeleteButton.tsx` | Confirm modal + soft-delete action |
 | `src/components/ResolveButton.tsx` | Confirm modal + resolve action |
 | `src/components/UnresolveButton.tsx` | Confirm modal + unresolve action |
@@ -77,7 +80,7 @@ npx prisma generate                           # regenerate client after schema c
 
 Run `npm install` before any `npx prisma ...`. Without `node_modules`, `npx` downloads Prisma 8, which rejects `migrate deploy`.
 
-`migrate dev` needs a shadow database, which the Supabase `postgres` user may not be allowed to create. The `20261115120000_add_currency`, `20261115130000_add_setting` and `20261115140000_drop_fx_rate` migrations were therefore written by hand (plain `ALTER TABLE` / `CREATE TABLE`, matching the `schema.prisma` change) and applied with `migrate deploy`. Do the same for future schema changes if `migrate dev` fails.
+`migrate dev` needs a shadow database, which the Supabase `postgres` user may not be allowed to create. The `20261115120000_add_currency`, `20261115130000_add_setting`, `20261115140000_drop_fx_rate` and `20261116120000_expense_own_currency` migrations were therefore written by hand (plain `ALTER TABLE` / `CREATE TABLE`, matching the `schema.prisma` change) and applied with `migrate deploy`. Do the same for future schema changes if `migrate dev` fails.
 
 If the generated client is stale after `prisma generate`, delete `src/generated/prisma/` entirely and re-run `npx prisma generate`.
 
@@ -111,19 +114,23 @@ Balance logic in `calculateNetBalances`: if `paidBack = true`, the payer is debi
 
 ## Currency
 
-All stored amounts (`Expense.amount`, `Split.amount`) are VND (`BASE_CURRENCY` in `constants.ts`), so `src/lib/balance.ts` is currency-unaware and unchanged. The add form accepts VND or SGD (`CURRENCIES`). The SGD→VND rate is one global app setting, stored in the `Setting` table (key `sgdToVnd`, model `Setting`). It is shown and edited in `FxRateEditor` at the top of the home page (server action `setFxRate`); until someone sets it, `DEFAULT_SGD_TO_VND` applies. The add form shows the rate read-only (it links to the home page to change it), converts the SGD total and splits to VND, and submits the converted values. `Expense.currency` and `originalAmount` record what was entered (audit only; never used in balance math). Expenses do not store the FX rate. Changing the global rate affects only expenses added afterwards; existing expenses keep their saved VND amounts.
+`Expense.amount` and `Split.amount` are stored in the expense's own `Expense.currency` (`VND` or `SGD`), exactly as entered. There is no `originalAmount` and no stored FX rate. `src/lib/balance.ts` is currency-unaware and unchanged.
 
-Display: money is shown through `formatVnd` (whole đồng). Dates use the `en-GB` locale. Expense cards show the original amount (for example `SGD 100.00`) under the VND amount when `originalAmount` is set. The CSV export has per-member VND columns plus `Currency` and `Original Amount`.
+Each browser has a display currency (cookie `splitwize_currency`, default `BASE_CURRENCY` = VND), switched with `CurrencyToggle` in the nav. Every page reads it with `getDisplayCurrency()`, then calls `convertExpenses(rows, display, rate)` on the fetched expenses **before** `calculateNetBalances`, so the balance code only sees one currency. The cards show the converted amount, plus the entered amount (for example `SGD 100.00`) when it differs from the display currency. The add form defaults to the display currency and stores what is typed.
+
+The SGD→VND rate is one global setting (`Setting` table, key `sgdToVnd`), edited in `FxRateEditor` on the home page (`setFxRate`); `DEFAULT_SGD_TO_VND` applies until set. Conversion is not rounded (`balance.ts` rounds each net balance to 0.01; `formatMoney` rounds for display), so changing the rate immediately changes every converted amount and balance, including resolved expenses on `/resolved-expenses`.
+
+Display: `formatMoney` shows whole đồng for VND and 2 decimals for SGD. Dates use the `en-GB` locale. The CSV export on `/expenses` is in the display currency with `Original Currency` and `Original Amount` columns.
 
 ## Split types
 
 - `equal` — total divided evenly; rounding remainder goes to last person
 - `percentage` — per-member percentage (must sum to 100%)
-- `exact` — per-member amounts (must sum within ±0.02 of total). On the form they are typed in the selected currency; each is converted to VND and the last member's share absorbs rounding so the splits sum to the converted total
+- `exact` — per-member amounts (must sum within ±0.02 of total). Typed in the selected currency; the last member's share absorbs rounding so the splits sum to the total
 
 ## Daily CSV export (Supabase Edge Function)
 
-`supabase/functions/export-expenses/index.ts` is a Deno Edge Function (excluded from the Next typecheck in `tsconfig.json`). It reads all non-deleted expenses (active and resolved, with a `Status` column), builds the same CSV columns as `ExportButton`, and uploads `expenses-YYYY-MM-DD.csv` to the private Storage bucket `expense-exports` (one file per day, same-day reruns overwrite). It returns early unless the current date in `Asia/Ho_Chi_Minh` is inside `WINDOW` (2026-11-19 to 2026-11-26) and requires the `x-cron-secret` header to equal the `EXPORT_CRON_SECRET` function secret. `MEMBERS` is duplicated inside the function (Deno cannot import from `src/`); update both when members change. Both this function and `ExportButton` prefix any CSV cell starting with `=`, `+`, `-`, `@`, tab or CR with `'` so spreadsheets treat user text (titles, names) as text instead of running it as a formula; keep that in any new CSV code.
+`supabase/functions/export-expenses/index.ts` is a Deno Edge Function (excluded from the Next typecheck in `tsconfig.json`). It reads all non-deleted expenses (active and resolved, with a `Status` column), builds a CSV (columns: Date, Title, Paid By, Currency, Total, Split Type, one per member, Status; amounts in each expense's own currency, no conversion), and uploads `expenses-YYYY-MM-DD.csv` to the private Storage bucket `expense-exports` (one file per day, same-day reruns overwrite). It returns early unless the current date in `Asia/Ho_Chi_Minh` is inside `WINDOW` (2026-11-19 to 2026-11-26) and requires the `x-cron-secret` header to equal the `EXPORT_CRON_SECRET` function secret. `MEMBERS` is duplicated inside the function (Deno cannot import from `src/`); update both when members change. Both this function and `ExportButton` prefix any CSV cell starting with `=`, `+`, `-`, `@`, tab or CR with `'` so spreadsheets treat user text (titles, names) as text instead of running it as a formula; keep that in any new CSV code.
 
 `supabase/setup-export-cron.sql` creates the bucket and schedules `pg_cron` job `export-expenses-daily` (`59 16 19-26 11 *` UTC = 23:59 Vietnam time, 19-26 November) which calls the function through `pg_net`, reading the secret from Vault. `pg_cron` has no year field, so unschedule the job after the trip (`select cron.unschedule('export-expenses-daily');`).
 
@@ -145,8 +152,8 @@ Planned: move to a new Supabase project in `ap-southeast-1` (Singapore), since a
 
 ## Known limitations
 
-- Money columns are `Float` (double precision). This is accurate enough for trip amounts: balances are rounded to 0.01 and split sums allow ±0.02. The one visible effect is 1 đồng display rounding, since VND is stored with 2 decimals but shown as whole đồng, so the displayed splits of an expense can differ from its displayed total by a few đồng. Switching to integer VND would mean changing `balance.ts` and the split code, so it was deliberately not done.
-- Changing the global FX rate never revalues existing expenses.
+- Money columns are `Float` (double precision). This is accurate enough for trip amounts: balances are rounded to 0.01 and split sums allow ±0.02. The one visible effect is display rounding (whole đồng for VND, 2 decimals for SGD), so the displayed splits of an expense can differ from its displayed total by a few đồng or 0.01. Switching to integer minor units would mean changing `balance.ts` and the split code, so it was deliberately not done.
+- Converted amounts depend on the current global FX rate, so balances shift when the rate changes, including for people who already settled at an earlier rate.
 
 ## Deployment
 

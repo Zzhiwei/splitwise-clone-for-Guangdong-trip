@@ -2,16 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { addExpense } from "@/lib/actions";
-import { MEMBERS, BASE_CURRENCY, CURRENCIES, TRIP_NAME, type Currency } from "@/lib/constants";
-import { formatVnd } from "@/lib/format";
+import { MEMBERS, CURRENCIES, TRIP_NAME, type Currency } from "@/lib/constants";
 
 type SplitType = "equal" | "percentage" | "exact";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-export default function AddExpenseForm({ rate }: { rate: number }) {
+export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: Currency }) {
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState<Currency>(BASE_CURRENCY);
+  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
   const [splitType, setSplitType] = useState<SplitType>("equal");
   const [included, setIncluded] = useState<Record<string, boolean>>(
     Object.fromEntries(MEMBERS.map((m) => [m, true]))
@@ -24,14 +23,10 @@ export default function AddExpenseForm({ rate }: { rate: number }) {
   );
   const [isPending, startTransition] = useTransition();
 
-  const isForeign = currency !== BASE_CURRENCY;
-  const factor = isForeign ? rate : 1;
-  const enteredTotalRaw = parseFloat(amount) || 0;
-  const totalBase = round2(enteredTotalRaw * factor);
+  const total = parseFloat(amount) || 0; // in the chosen currency; stored as entered
 
   function computeSplits() {
     const activeMembers = MEMBERS.filter((m) => included[m]);
-    const total = totalBase;
 
     if (splitType === "equal") {
       const share = Math.round((total / activeMembers.length) * 100) / 100;
@@ -52,32 +47,28 @@ export default function AddExpenseForm({ rate }: { rate: number }) {
       }));
     }
 
-    // Exact amounts are typed in the chosen currency; convert, then absorb rounding in the last split.
-    const converted = activeMembers.map((m) => ({
+    // Exact amounts are typed in the chosen currency; the last split absorbs rounding.
+    const exact = activeMembers.map((m) => ({
       member: m,
-      amount: round2((parseFloat(exactAmounts[m]) || 0) * factor),
+      amount: round2(parseFloat(exactAmounts[m]) || 0),
     }));
-    if (converted.length > 0 && Math.abs(exactSum - enteredTotal) < 0.02) {
-      const others = converted.slice(0, -1).reduce((s, x) => s + x.amount, 0);
-      converted[converted.length - 1].amount = round2(total - others);
+    if (exact.length > 0 && Math.abs(exactSum - total) < 0.02) {
+      const others = exact.slice(0, -1).reduce((s, x) => s + x.amount, 0);
+      exact[exact.length - 1].amount = round2(total - others);
     }
-    return converted;
+    return exact;
   }
 
   function handleSubmit(formData: FormData) {
     const splits = computeSplits();
     formData.set("splits", JSON.stringify(splits));
-    // Store VND; keep what was actually entered for the audit trail.
     formData.set("currency", currency);
-    formData.set("originalAmount", String(enteredTotal));
-    formData.set("amount", String(totalBase));
+    formData.set("amount", String(round2(total)));
     startTransition(() => addExpense(formData));
   }
 
   const today = new Date().toISOString().split("T")[0];
   const activeMembers = MEMBERS.filter((m) => included[m]);
-  const enteredTotal = enteredTotalRaw;
-  const total = enteredTotal; // in the chosen currency; used for display and exact-sum check
 
   const percentageSum = activeMembers.reduce(
     (s, m) => s + (parseFloat(percentages[m]) || 0),
@@ -136,17 +127,6 @@ export default function AddExpenseForm({ rate }: { rate: number }) {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="0.00"
           />
-          {isForeign && (
-            <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
-              <span>
-                1 {currency} = {rate.toLocaleString("en-US")} {BASE_CURRENCY}
-              </span>
-              <a href="/" className="text-indigo-600 hover:underline">
-                (change on home page)
-              </a>
-              {totalBase > 0 && <span className="text-gray-400">≈ {formatVnd(totalBase)}</span>}
-            </div>
-          )}
         </div>
 
         <div>

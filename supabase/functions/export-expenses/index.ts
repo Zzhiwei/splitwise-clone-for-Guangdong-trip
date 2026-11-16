@@ -16,7 +16,6 @@ type Expense = {
   date: string;
   splitType: string;
   currency: string;
-  originalAmount: number | null;
   resolvedAt: string | null;
   Split: Split[];
 };
@@ -29,7 +28,8 @@ const q = (cell: string) => {
 
 function toCsv(expenses: Expense[]): string {
   const rows: string[][] = [
-    ["Date", "Title", "Paid By", "Total (VND)", "Split Type", ...MEMBERS.map((m) => `${m} (VND)`), "Currency", "Original Amount", "Status"],
+    // Amounts are in each expense's own currency (see the Currency column); no conversion here.
+    ["Date", "Title", "Paid By", "Currency", "Total", "Split Type", ...MEMBERS, "Status"],
   ];
   for (const e of expenses) {
     const byMember = Object.fromEntries(e.Split.map((s) => [s.member, s.amount.toFixed(2)]));
@@ -37,11 +37,10 @@ function toCsv(expenses: Expense[]): string {
       new Date(e.date).toLocaleDateString("en-GB", { timeZone: TZ }),
       e.title,
       e.paidBy,
+      e.currency,
       e.amount.toFixed(2),
       e.splitType,
       ...MEMBERS.map((m) => byMember[m] ?? ""),
-      e.currency,
-      e.originalAmount?.toFixed(2) ?? "",
       e.resolvedAt ? "resolved" : "active",
     ]);
   }
@@ -66,7 +65,7 @@ Deno.serve(async (req) => {
 
   const { data, error } = await supabase
     .from("Expense")
-    .select("title, amount, paidBy, date, splitType, currency, originalAmount, resolvedAt, Split(member, amount)")
+    .select("title, amount, paidBy, date, splitType, currency, resolvedAt, Split(member, amount)")
     .is("deletedAt", null)
     .order("date", { ascending: true });
   if (error) return new Response(error.message, { status: 500 });

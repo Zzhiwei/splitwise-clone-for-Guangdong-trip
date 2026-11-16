@@ -1,12 +1,20 @@
 import { prisma } from "@/lib/db";
 import ExpenseList from "@/components/ExpenseList";
+import { getFxRate } from "@/lib/fx";
+import { convertExpenses } from "@/lib/currency";
+import { getDisplayCurrency } from "@/lib/display-currency";
 
 export default async function ResolvedExpensesPage() {
-  const expenses = await prisma.expense.findMany({
-    where: { deletedAt: null, resolvedAt: { not: null } },
-    include: { splits: true },
-    orderBy: { resolvedAt: "desc" },
-  });
+  const display = getDisplayCurrency();
+  const [rows, fxRate] = await Promise.all([
+    prisma.expense.findMany({
+      where: { deletedAt: null, resolvedAt: { not: null } },
+      include: { splits: true },
+      orderBy: { resolvedAt: "desc" },
+    }),
+    getFxRate(),
+  ]);
+  const expenses = convertExpenses(rows, display, fxRate);
 
   return (
     <div className="space-y-4">
@@ -14,7 +22,7 @@ export default async function ResolvedExpensesPage() {
         <h1 className="text-2xl font-bold text-gray-900">Resolved expenses</h1>
         <p className="text-sm text-gray-500 mt-0.5">{expenses.length} expenses</p>
       </div>
-      <ExpenseList expenses={expenses} showResolve={false} showUnresolve={true} />
+      <ExpenseList expenses={expenses} currency={display} showResolve={false} showUnresolve={true} />
     </div>
   );
 }

@@ -1,13 +1,15 @@
 import type { NetBalance, Transaction } from "@/lib/balance";
-import { formatVnd } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
+import type { Currency } from "@/lib/constants";
 import Avatar from "./Avatar";
 
 interface Props {
   net: NetBalance;
   transactions: Transaction[];
+  currency: Currency;
 }
 
-export default function BalanceSummary({ net, transactions }: Props) {
+export default function BalanceSummary({ net, transactions, currency }: Props) {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -31,7 +33,7 @@ export default function BalanceSummary({ net, transactions }: Props) {
                 }`}
               >
                 {amount > 0 ? "+" : ""}
-                {formatVnd(amount)}
+                {formatMoney(amount, currency)}
               </span>
               </div>
             </div>
@@ -51,7 +53,7 @@ export default function BalanceSummary({ net, transactions }: Props) {
                 <span className="text-gray-400">→</span>
                 <span className="font-medium text-green-600">{t.to}</span>
                 <span className="ml-auto font-bold text-gray-800">
-                  {formatVnd(t.amount)}
+                  {formatMoney(t.amount, currency)}
                 </span>
               </li>
             ))}

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import CurrencyToggle from "./CurrencyToggle";
+import { getDisplayCurrency } from "@/lib/display-currency";
 
 export default function Nav() {
   return (
@@ -23,6 +25,7 @@ export default function Nav() {
           >
             + Add
           </Link>
+          <CurrencyToggle current={getDisplayCurrency()} />
         </div>
       </div>
     </nav>

@@ -1,14 +1,15 @@
 "use client";
 
 import type { Expense, Split } from "@/generated/prisma/client";
-import { MEMBERS } from "@/lib/constants";
+import { MEMBERS, type Currency } from "@/lib/constants";
 
-type ExpenseWithSplits = Expense & { splits: Split[] };
+// Amounts are in the display currency; source* are the entered values.
+type ExpenseWithSplits = Expense & { splits: Split[]; sourceCurrency: string; sourceAmount: number };
 
-export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits[] }) {
+export default function ExportButton({ expenses, currency }: { expenses: ExpenseWithSplits[]; currency: Currency }) {
   function handleExport() {
     const rows: string[][] = [
-      ["Date", "Title", "Paid By", "Total (VND)", "Split Type", ...MEMBERS.map((m) => `${m} (VND)`), "Currency", "Original Amount"],
+      ["Date", "Title", "Paid By", `Total (${currency})`, "Split Type", ...MEMBERS.map((m) => `${m} (${currency})`), "Original Currency", "Original Amount"],
     ];
 
     for (const expense of expenses) {
@@ -22,8 +23,8 @@ export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits
         expense.amount.toFixed(2),
         expense.splitType,
         ...MEMBERS.map((m) => splitMap[m] ?? ""),
-        expense.currency,
-        expense.originalAmount?.toFixed(2) ?? "",
+        expense.sourceCurrency,
+        expense.sourceAmount.toFixed(2),
       ]);
     }
 

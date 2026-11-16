@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { prisma } from "./db";
 import { MEMBERS, BASE_CURRENCY, CURRENCIES, type Currency } from "./constants";
 import { FX_KEY } from "./fx";
+import { DISPLAY_CURRENCY_COOKIE } from "./display-currency";
 
 interface SplitInput {
   member: string;
@@ -23,15 +24,13 @@ export async function addExpense(formData: FormData) {
     throw new Error("Invalid paidBy");
   }
 
-  // amount/splits arrive already converted to the base currency (VND); these are audit fields.
+  // amount and splits are in this currency, stored as entered.
   const currency = ((formData.get("currency") as string) || BASE_CURRENCY) as Currency;
   if (!CURRENCIES.includes(currency)) {
     throw new Error("Invalid currency");
   }
-  const isForeign = currency !== BASE_CURRENCY;
-  const originalAmount = isForeign ? parseFloat(formData.get("originalAmount") as string) : null;
-  if (isForeign && !(originalAmount! > 0)) {
-    throw new Error("Invalid original amount");
+  if (!(amount > 0)) {
+    throw new Error("Invalid amount");
   }
 
   const splitsRaw = formData.get("splits") as string;
@@ -50,7 +49,6 @@ export async function addExpense(formData: FormData) {
       date: new Date(date),
       splitType,
       currency,
-      originalAmount,
       splits: {
         create: splits.map((sp) => ({ member: sp.member, amount: sp.amount })),
       },
@@ -73,6 +71,17 @@ export async function setFxRate(rate: number) {
   });
   revalidatePath("/");
   revalidatePath("/add");
+}
+
+export async function setDisplayCurrency(currency: Currency) {
+  if (!CURRENCIES.includes(currency)) {
+    throw new Error("Invalid currency");
+  }
+  cookies().set(DISPLAY_CURRENCY_COOKIE, currency, {
+    maxAge: 60 * 60 * 24 * 365,
+    path: "/",
+  });
+  revalidatePath("/", "layout");
 }
 
 export async function deleteExpense(id: string) {

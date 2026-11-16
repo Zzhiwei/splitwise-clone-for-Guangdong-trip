@@ -1,19 +1,26 @@
 import type { Expense, Split } from "@/generated/prisma/client";
+import type { Currency } from "@/lib/constants";
 import DeleteButton from "./DeleteButton";
 import ResolveButton from "./ResolveButton";
 import UnresolveButton from "./UnresolveButton";
 import SplitRow from "./SplitRow";
-import { formatVnd } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 
-type ExpenseWithSplits = Expense & { splits: (Split & { paidBack: boolean })[] };
+// Amounts are already converted to the display currency; source* hold what was entered.
+type ExpenseWithSplits = Expense & {
+  splits: (Split & { paidBack: boolean })[];
+  sourceCurrency: string;
+  sourceAmount: number;
+};
 
 interface Props {
   expenses: ExpenseWithSplits[];
+  currency: Currency;
   showResolve?: boolean;
   showUnresolve?: boolean;
 }
 
-export default function ExpenseList({ expenses, showResolve = true, showUnresolve = false }: Props) {
+export default function ExpenseList({ expenses, currency, showResolve = true, showUnresolve = false }: Props) {
   if (expenses.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500">
@@ -47,6 +54,7 @@ export default function ExpenseList({ expenses, showResolve = true, showUnresolv
                     amount={s.amount}
                     paidBack={s.paidBack}
                     paidBy={expense.paidBy}
+                    currency={currency}
                   />
                 ))}
               </div>
@@ -54,11 +62,11 @@ export default function ExpenseList({ expenses, showResolve = true, showUnresolv
             <div className="flex items-center gap-3 ml-4 shrink-0">
               <div className="text-right">
                 <span className="text-lg font-bold text-gray-900">
-                  {formatVnd(expense.amount)}
+                  {formatMoney(expense.amount, currency)}
                 </span>
-                {expense.originalAmount != null && (
+                {expense.sourceCurrency !== currency && (
                   <p className="text-xs text-gray-400">
-                    {expense.currency} {expense.originalAmount.toFixed(2)}
+                    {expense.sourceCurrency} {expense.sourceAmount.toFixed(2)}
                   </p>
                 )}
               </div>
