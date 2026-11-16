@@ -1,25 +1,49 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addExpense } from "@/lib/actions";
+import { addExpense, updateExpense } from "@/lib/actions";
 import { MEMBERS, CURRENCIES, TRIP_NAME, type Currency } from "@/lib/constants";
 
 type SplitType = "equal" | "percentage" | "exact";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: Currency }) {
-  const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState<Currency>(defaultCurrency);
-  const [splitType, setSplitType] = useState<SplitType>("equal");
+// Existing expense to edit; amounts are in its own currency, as stored.
+export interface EditableExpense {
+  id: string;
+  title: string;
+  amount: number;
+  paidBy: string;
+  date: string; // YYYY-MM-DD
+  splitType: string;
+  currency: Currency;
+  splits: { member: string; amount: number }[];
+}
+
+export default function AddExpenseForm({
+  defaultCurrency,
+  expense,
+}: {
+  defaultCurrency: Currency;
+  expense?: EditableExpense;
+}) {
+  const splitOf = (m: string) => expense?.splits.find((s) => s.member === m);
+  const [amount, setAmount] = useState(expense ? String(expense.amount) : "");
+  const [currency, setCurrency] = useState<Currency>(expense?.currency ?? defaultCurrency);
+  const [splitType, setSplitType] = useState<SplitType>((expense?.splitType as SplitType) ?? "equal");
   const [included, setIncluded] = useState<Record<string, boolean>>(
-    Object.fromEntries(MEMBERS.map((m) => [m, true]))
+    Object.fromEntries(MEMBERS.map((m) => [m, expense ? !!splitOf(m) : true]))
   );
   const [percentages, setPercentages] = useState<Record<string, string>>(
-    Object.fromEntries(MEMBERS.map((m) => [m, String(100 / MEMBERS.length)]))
+    Object.fromEntries(
+      MEMBERS.map((m) => {
+        const sp = splitOf(m);
+        return [m, String(sp && expense ? round2((sp.amount / expense.amount) * 100) : 100 / MEMBERS.length)];
+      })
+    )
   );
   const [exactAmounts, setExactAmounts] = useState<Record<string, string>>(
-    Object.fromEntries(MEMBERS.map((m) => [m, ""]))
+    Object.fromEntries(MEMBERS.map((m) => [m, expense ? String(splitOf(m)?.amount ?? "") : ""]))
   );
   const [isPending, startTransition] = useTransition();
 
@@ -64,10 +88,10 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
     formData.set("splits", JSON.stringify(splits));
     formData.set("currency", currency);
     formData.set("amount", String(round2(total)));
-    startTransition(() => addExpense(formData));
+    startTransition(() => (expense ? updateExpense(expense.id, formData) : addExpense(formData)));
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = expense?.date ?? new Date().toISOString().split("T")[0];
   const activeMembers = MEMBERS.filter((m) => included[m]);
 
   const percentageSum = activeMembers.reduce(
@@ -81,7 +105,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-black text-ink tracking-tight">Add expense · {TRIP_NAME}</h1>
+      <h1 className="text-3xl font-black text-ink tracking-tight">{expense ? "Edit expense" : "Add expense"} · {TRIP_NAME}</h1>
 
       <form action={handleSubmit} className="space-y-5">
         <div>
@@ -91,6 +115,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
           <input
             name="title"
             required
+            defaultValue={expense?.title}
             className="w-full bg-card border border-ink text-ink placeholder:text-muted rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-ink"
             placeholder="e.g. Pho in Hanoi"
           />
@@ -136,6 +161,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
           <select
             name="paidBy"
             required
+            defaultValue={expense?.paidBy}
             className="w-full bg-card border border-ink text-ink placeholder:text-muted rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-ink"
           >
             {MEMBERS.map((m) => (

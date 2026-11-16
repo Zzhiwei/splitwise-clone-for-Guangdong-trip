@@ -1,5 +1,6 @@
 import type { Expense, Split } from "@/generated/prisma/client";
 import type { Currency } from "@/lib/constants";
+import Link from "next/link";
 import DeleteButton from "./DeleteButton";
 import ResolveButton from "./ResolveButton";
 import UnresolveButton from "./UnresolveButton";
@@ -79,6 +80,12 @@ export default function ExpenseList({ expenses, currency, showResolve = true, sh
           <div className="mt-2 pt-1 border-t border-hairline flex justify-end">
             {showResolve && <ResolveButton id={expense.id} />}
             {showUnresolve && <UnresolveButton id={expense.id} />}
+            <Link
+              href={`/expenses/${expense.id}/edit`}
+              className="min-h-[44px] px-3 inline-flex items-center text-sm font-medium text-ink hover:opacity-80"
+            >
+              Edit
+            </Link>
             <DeleteButton id={expense.id} />
           </div>
         </li>

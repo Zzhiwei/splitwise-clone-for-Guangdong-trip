@@ -28,7 +28,7 @@ Data recorded under a member who is no longer in `MEMBERS` breaks `calculateNetB
 | `src/lib/db.ts` | Prisma singleton using `PrismaPg` adapter |
 | `src/middleware.ts` | Auth gate — redirects to `/login` if `splitwize_auth` cookie absent |
 | `src/app/login/page.tsx` | Full-screen password entry page |
-| `src/lib/actions.ts` | Server Actions: `addExpense`, `setFxRate`, `setDisplayCurrency`, `deleteExpense`, `resolveExpense`, `unresolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
+| `src/lib/actions.ts` | Server Actions: `addExpense`, `setFxRate`, `setDisplayCurrency`, `updateExpense`, `deleteExpense`, `resolveExpense`, `unresolveExpense`, `toggleSplitPaidBack`, `verifyPassword` |
 | `src/lib/balance.ts` | `calculateNetBalances` + `simplifyDebts` (greedy two-pointer). Currency-unaware; keep changes here minimal, it was validated on a real trip |
 | `src/lib/balance.test.ts` | Vitest cases for the balance logic (`npm test`) |
 | `src/lib/constants.ts` | `MEMBERS`, `TRIP_NAME`, `BASE_CURRENCY` (default display/entry currency), `CURRENCIES`, `DEFAULT_SGD_TO_VND` |
@@ -39,7 +39,8 @@ Data recorded under a member who is no longer in `MEMBERS` breaks `calculateNetB
 | `src/app/expenses/page.tsx` | Active expense history + CSV export |
 | `src/app/resolved-expenses/page.tsx` | Resolved/settled expenses archive |
 | `src/app/add/page.tsx` | Server wrapper for the add form; looks up the last-used FX rate |
-| `src/components/AddExpenseForm.tsx` | Add expense form (client component); submits amounts in the chosen currency, no conversion |
+| `src/components/AddExpenseForm.tsx` | Add/edit expense form (client component); submits amounts in the chosen currency, no conversion. Takes an optional `expense` prop to edit |
+| `src/app/expenses/[id]/edit/page.tsx` | Edit page: loads the expense and renders `AddExpenseForm` with it. `updateExpense` replaces the splits but keeps each member's `paidBack` |
 | `src/lib/fx.ts` | `getFxRate` — reads the global SGD→VND rate from the `Setting` table, falling back to `DEFAULT_SGD_TO_VND` |
 | `src/components/FxRateEditor.tsx` | Rate display + edit control at the top of the home page (calls `setFxRate`) |
 | `src/components/Avatar.tsx` | Member profile picture from `public/profile-pics/` |

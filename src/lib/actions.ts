@@ -13,7 +13,8 @@ interface SplitInput {
   amount: number;
 }
 
-export async function addExpense(formData: FormData) {
+// Shared by addExpense and updateExpense: validates the form and returns the expense fields.
+function parseExpense(formData: FormData) {
   const title = formData.get("title") as string;
   const amount = parseFloat(formData.get("amount") as string);
   const paidBy = formData.get("paidBy") as string;
@@ -41,14 +42,21 @@ export async function addExpense(formData: FormData) {
     throw new Error("Split amounts do not sum to total");
   }
 
+  for (const sp of splits) {
+    if (!MEMBERS.includes(sp.member as (typeof MEMBERS)[number])) {
+      throw new Error("Invalid split member");
+    }
+  }
+
+  return { title, amount, paidBy, date: new Date(date), splitType, currency, splits };
+}
+
+export async function addExpense(formData: FormData) {
+  const { splits, ...expense } = parseExpense(formData);
+
   await prisma.expense.create({
     data: {
-      title,
-      amount,
-      paidBy,
-      date: new Date(date),
-      splitType,
-      currency,
+      ...expense,
       splits: {
         create: splits.map((sp) => ({ member: sp.member, amount: sp.amount })),
       },
@@ -58,6 +66,40 @@ export async function addExpense(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/expenses");
   redirect("/");
+}
+
+export async function updateExpense(id: string, formData: FormData) {
+  const { splits, ...expense } = parseExpense(formData);
+
+  // Splits are replaced; a member who keeps a split keeps their paidBack flag.
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.expense.findFirst({
+      where: { id, deletedAt: null },
+      include: { splits: true },
+    });
+    if (!existing) throw new Error("Expense not found");
+    const paidBack = new Map(existing.splits.map((s) => [s.member, s.paidBack]));
+
+    await tx.split.deleteMany({ where: { expenseId: id } });
+    await tx.expense.update({
+      where: { id },
+      data: {
+        ...expense,
+        splits: {
+          create: splits.map((sp) => ({
+            member: sp.member,
+            amount: sp.amount,
+            paidBack: paidBack.get(sp.member) ?? false,
+          })),
+        },
+      },
+    });
+  });
+
+  revalidatePath("/");
+  revalidatePath("/expenses");
+  revalidatePath("/resolved-expenses");
+  redirect("/expenses");
 }
 
 export async function setFxRate(rate: number) {
