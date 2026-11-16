@@ -12,8 +12,8 @@ interface Props {
 export default function BalanceSummary({ net, transactions, currency }: Props) {
   return (
     <div className="space-y-4">
-      <div className="bg-card rounded-xl border border-hairline p-4">
-        <h2 className="text-lg font-semibold text-white mb-3">Balances</h2>
+      <div className="bg-card rounded-3xl border border-hairline p-4">
+        <h2 className="text-lg font-semibold text-ink mb-3">Balances</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {Object.entries(net).map(([member, amount]) => (
             <div
@@ -23,7 +23,7 @@ export default function BalanceSummary({ net, transactions, currency }: Props) {
               <Avatar member={member} size={36} />
               <span className="flex-1 min-w-0 truncate font-medium text-body">{member}</span>
               <span
-                className={`font-num font-semibold text-sm whitespace-nowrap ${
+                className={`tabular-nums font-semibold text-sm whitespace-nowrap ${
                   amount > 0
                     ? "text-up"
                     : amount < 0
@@ -39,8 +39,8 @@ export default function BalanceSummary({ net, transactions, currency }: Props) {
         </div>
       </div>
 
-      <div className="bg-card rounded-xl border border-hairline p-4">
-        <h2 className="text-lg font-semibold text-white mb-3">Suggested settle-up</h2>
+      <div className="bg-card rounded-3xl border border-hairline p-4">
+        <h2 className="text-lg font-semibold text-ink mb-3">Suggested settle-up</h2>
         {transactions.length === 0 ? (
           <p className="text-muted text-sm">Everyone is settled up 🎉</p>
         ) : (
@@ -50,7 +50,7 @@ export default function BalanceSummary({ net, transactions, currency }: Props) {
                 <span className="font-medium text-down">{t.from}</span>
                 <span className="text-muted">→</span>
                 <span className="font-medium text-up">{t.to}</span>
-                <span className="ml-auto font-num font-semibold text-white whitespace-nowrap">
+                <span className="ml-auto tabular-nums font-semibold text-ink whitespace-nowrap">
                   {formatMoney(t.amount, currency)}
                 </span>
               </li>

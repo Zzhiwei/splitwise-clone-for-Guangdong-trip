@@ -81,7 +81,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white tracking-tight">Add expense · {TRIP_NAME}</h1>
+      <h1 className="text-3xl font-black text-ink tracking-tight">Add expense · {TRIP_NAME}</h1>
 
       <form action={handleSubmit} className="space-y-5">
         <div>
@@ -91,7 +91,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
           <input
             name="title"
             required
-            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
+            className="w-full bg-card border border-ink text-ink placeholder:text-muted rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-ink"
             placeholder="e.g. Pho in Hanoi"
           />
         </div>
@@ -109,7 +109,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                 className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium ${
                   currency === c
                     ? "bg-primary text-ink font-semibold"
-                    : "bg-elevated text-body hover:bg-hairline"
+                    : "bg-card text-ink hover:bg-primary-pale"
                 }`}
               >
                 {c}
@@ -124,7 +124,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
+            className="w-full bg-card border border-ink text-ink placeholder:text-muted rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-ink"
             placeholder="0.00"
           />
         </div>
@@ -136,7 +136,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
           <select
             name="paidBy"
             required
-            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
+            className="w-full bg-card border border-ink text-ink placeholder:text-muted rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-ink"
           >
             {MEMBERS.map((m) => (
               <option key={m} value={m}>
@@ -155,7 +155,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             type="date"
             defaultValue={today}
             required
-            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
+            className="w-full bg-card border border-ink text-ink placeholder:text-muted rounded-xl px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-ink"
           />
         </div>
 
@@ -173,7 +173,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                 className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium ${
                   splitType === t
                     ? "bg-primary text-ink font-semibold"
-                    : "bg-elevated text-body hover:bg-hairline"
+                    : "bg-card text-ink hover:bg-primary-pale"
                 }`}
               >
                 {t === "equal" ? "Equal" : t === "percentage" ? "By percentage" : "Custom"}
@@ -196,7 +196,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                   onChange={(e) =>
                     setIncluded((prev) => ({ ...prev, [m]: e.target.checked }))
                   }
-                  className="h-5 w-5 rounded border-hairline accent-primary"
+                  className="h-5 w-5 rounded border-hairline accent-ink"
                 />
                 <label
                   htmlFor={`member-${m}`}
@@ -219,7 +219,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                           [m]: e.target.value,
                         }))
                       }
-                      className="w-20 bg-card border border-hairline text-white rounded-md px-2 py-1.5 font-num focus:outline-none focus:ring-2 focus:ring-info/50 text-base"
+                      className="w-20 bg-card border border-ink text-ink rounded-lg px-2 py-1.5 tabular-nums focus:outline-none focus:ring-2 focus:ring-primary text-base"
                     />
                     <span className="text-sm text-muted">%</span>
                   </div>
@@ -239,7 +239,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                           [m]: e.target.value,
                         }))
                       }
-                      className="w-28 bg-card border border-hairline text-white rounded-md px-2 py-1.5 font-num focus:outline-none focus:ring-2 focus:ring-info/50 text-base"
+                      className="w-28 bg-card border border-ink text-ink rounded-lg px-2 py-1.5 tabular-nums focus:outline-none focus:ring-2 focus:ring-primary text-base"
                       placeholder="0.00"
                     />
                   </div>
@@ -286,7 +286,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
         <button
           type="submit"
           disabled={isPending}
-          className="w-full bg-primary text-ink py-3 rounded-md font-semibold hover:bg-primary-active transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-primary text-ink py-3 rounded-3xl font-semibold hover:bg-primary-active transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isPending && (
             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

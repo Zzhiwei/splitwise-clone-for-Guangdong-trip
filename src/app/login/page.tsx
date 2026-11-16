@@ -19,9 +19,9 @@ export default function LoginPage() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas">
-      <div className="bg-card rounded-xl border border-hairline p-8 w-80 space-y-5">
+      <div className="bg-card rounded-3xl border border-hairline p-8 w-80 space-y-5">
         <div className="text-center">
-          <p className="text-2xl font-bold text-primary tracking-tight">Splitwize</p>
+          <p className="text-2xl font-black text-ink tracking-tight">Splitwize</p>
           <p className="text-sm text-muted mt-1">Vietnam Trip</p>
         </div>
 
@@ -36,7 +36,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoFocus
-              className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
+              className="w-full bg-card border border-ink text-ink placeholder:text-muted rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-ink"
               placeholder="Enter password"
             />
           </div>
@@ -48,7 +48,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full bg-primary text-ink py-2.5 rounded-md font-semibold hover:bg-primary-active transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-primary text-ink py-2.5 rounded-3xl font-semibold hover:bg-primary-active transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isPending && (
               <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

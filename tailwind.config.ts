@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-// Tokens from design.md (Binance dark theme).
+// Tokens from design-2.md (Wise light theme): sage canvas, white cards, lime CTA.
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,23 +10,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: "#0b0e11",
-        card: "#1e2329",
-        elevated: "#2b3139",
-        hairline: "#2b3139",
-        primary: "#fcd535",
-        "primary-active": "#f0b90b",
-        ink: "#181a20",
-        body: "#eaecef",
-        muted: "#707a8a",
-        "muted-strong": "#929aa5",
-        up: "#0ecb81",
-        down: "#f6465d",
-        info: "#3b82f6",
+        canvas: "#e8ebe6",
+        card: "#ffffff",
+        elevated: "#e8ebe6",
+        hairline: "#e8ebe6",
+        primary: "#9fe870",
+        "primary-active": "#cdffad",
+        "primary-pale": "#e2f6d5",
+        ink: "#0e0f0c",
+        body: "#454745",
+        muted: "#868685",
+        "muted-strong": "#454745",
+        up: "#054d28",
+        down: "#d03238",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        num: ["var(--font-num)", "var(--font-sans)", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "-apple-system", "sans-serif"],
       },
     },
   },

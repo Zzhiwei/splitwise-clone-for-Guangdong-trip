@@ -18,7 +18,7 @@ export default function FxRateEditor({ rate }: { rate: number }) {
   }
 
   return (
-    <div className="bg-card rounded-xl border border-hairline px-4 py-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-body">
+    <div className="bg-card rounded-3xl border border-hairline px-4 py-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-body">
       <span className="font-medium whitespace-nowrap">FX rate</span>
       {editing ? (
         <>
@@ -29,13 +29,13 @@ export default function FxRateEditor({ rate }: { rate: number }) {
             min="0"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="w-24 bg-card border border-hairline text-white rounded-md px-2 py-1.5 font-num focus:outline-none focus:ring-2 focus:ring-info/50 text-base"
+            className="w-24 bg-card border border-ink text-ink rounded-lg px-2 py-1.5 tabular-nums focus:outline-none focus:ring-2 focus:ring-primary text-base"
           />
           <span className="whitespace-nowrap">VND</span>
           <button
             onClick={save}
             disabled={isPending}
-            className="ml-auto min-h-[44px] px-2 text-primary font-medium disabled:opacity-50"
+            className="ml-auto min-h-[44px] px-2 text-ink underline underline-offset-4 font-medium disabled:opacity-50"
           >
             {isPending ? "Saving…" : "Save"}
           </button>
@@ -51,10 +51,10 @@ export default function FxRateEditor({ rate }: { rate: number }) {
         </>
       ) : (
         <>
-          <span className="font-num whitespace-nowrap">1 SGD = {rate.toLocaleString("en-US")} VND</span>
+          <span className="tabular-nums whitespace-nowrap">1 SGD = {rate.toLocaleString("en-US")} VND</span>
           <button
             onClick={() => setEditing(true)}
-            className="ml-auto min-h-[44px] px-2 text-primary font-medium"
+            className="ml-auto min-h-[44px] px-2 text-ink underline underline-offset-4 font-medium"
           >
             Edit
           </button>

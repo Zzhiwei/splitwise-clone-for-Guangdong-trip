@@ -29,12 +29,12 @@ export default function SplitRow({ splitId, member, amount, paidBack, paidBy, cu
       className={`flex items-center gap-2 min-h-[40px] ${!isOwn ? "cursor-pointer select-none" : ""} ${isPending ? "opacity-50" : ""}`}
     >
       <span className="flex-1 min-w-0 truncate text-sm text-body">{member}</span>
-      <span className="font-num text-sm text-body whitespace-nowrap">{formatMoney(amount, currency)}</span>
+      <span className="tabular-nums text-sm text-body whitespace-nowrap">{formatMoney(amount, currency)}</span>
       <span className="w-24 text-right text-xs whitespace-nowrap">
         {isOwn ? (
-          <span className="text-primary">Payer</span>
+          <span className="font-semibold text-ink">Payer</span>
         ) : paidBack ? (
-          <span className="text-up">✓ Paid back</span>
+          <span className="bg-primary-pale text-up font-semibold rounded-full px-2.5 py-0.5">✓ Paid back</span>
         ) : (
           <span className="text-muted">○ Unpaid</span>
         )}

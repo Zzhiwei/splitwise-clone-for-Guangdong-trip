@@ -8,7 +8,7 @@ export default function CurrencyToggle({ current }: { current: Currency }) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className={`flex rounded-md overflow-hidden border border-hairline ${isPending ? "opacity-50" : ""}`}>
+    <div className={`flex rounded-full overflow-hidden border border-ink ${isPending ? "opacity-50" : ""}`}>
       {CURRENCIES.map((c) => (
         <button
           key={c}

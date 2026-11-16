@@ -23,7 +23,7 @@ interface Props {
 export default function ExpenseList({ expenses, currency, showResolve = true, showUnresolve = false }: Props) {
   if (expenses.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-hairline p-6 text-center text-muted">
+      <div className="bg-card rounded-3xl border border-hairline p-6 text-center text-muted">
         No expenses yet.
       </div>
     );
@@ -34,11 +34,11 @@ export default function ExpenseList({ expenses, currency, showResolve = true, sh
       {expenses.map((expense) => (
         <li
           key={expense.id}
-          className="bg-card rounded-xl border border-hairline p-4"
+          className="bg-card rounded-3xl border border-hairline p-4"
         >
           <div className="flex justify-between items-start gap-3">
             <div className="min-w-0">
-              <p className="font-semibold text-white break-words">{expense.title}</p>
+              <p className="font-semibold text-ink break-words">{expense.title}</p>
               <p className="text-sm text-muted">
                 Paid by:{" "}
                 <span className="font-medium text-body">{expense.paidBy}</span>
@@ -47,11 +47,11 @@ export default function ExpenseList({ expenses, currency, showResolve = true, sh
               </p>
             </div>
             <div className="text-right shrink-0">
-              <span className="font-num text-lg font-bold text-white whitespace-nowrap">
+              <span className="tabular-nums text-lg font-bold text-ink whitespace-nowrap">
                 {formatMoney(expense.amount, currency)}
               </span>
               {expense.sourceCurrency !== currency && (
-                <p className="font-num text-xs text-muted whitespace-nowrap">
+                <p className="tabular-nums text-xs text-muted whitespace-nowrap">
                   {expense.sourceCurrency} {expense.sourceAmount.toFixed(2)}
                 </p>
               )}

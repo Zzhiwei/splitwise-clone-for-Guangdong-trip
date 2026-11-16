@@ -2,13 +2,13 @@ import Link from "next/link";
 import CurrencyToggle from "./CurrencyToggle";
 import { getDisplayCurrency } from "@/lib/display-currency";
 
-const linkClass = "py-2 font-medium text-body hover:text-primary";
+const linkClass = "py-2 font-medium text-body hover:underline";
 
 export default function Nav() {
   return (
-    <nav className="sticky top-0 z-10 bg-canvas border-b border-hairline">
+    <nav className="sticky top-0 z-10 bg-card border-b border-hairline">
       <div className="max-w-2xl mx-auto px-4 pt-3 flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-primary py-2">
+        <Link href="/" className="text-lg font-black text-ink py-2 tracking-tight">
           Splitwize
         </Link>
         <CurrencyToggle current={getDisplayCurrency()} />
@@ -25,7 +25,7 @@ export default function Nav() {
         </Link>
         <Link
           href="/add"
-          className="bg-primary text-ink font-semibold px-4 py-2 rounded-md hover:bg-primary-active"
+          className="bg-primary text-ink font-semibold px-4 py-2 rounded-3xl hover:bg-primary-active"
         >
           + Add
         </Link>
