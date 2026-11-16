@@ -91,7 +91,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
           <input
             name="title"
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="e.g. Pho in Hanoi"
           />
         </div>
@@ -106,7 +106,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                 key={c}
                 type="button"
                 onClick={() => setCurrency(c)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium ${
                   currency === c
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -124,7 +124,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="0.00"
           />
         </div>
@@ -136,7 +136,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
           <select
             name="paidBy"
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {MEMBERS.map((m) => (
               <option key={m} value={m}>
@@ -155,7 +155,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             type="date"
             defaultValue={today}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
@@ -170,7 +170,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                 key={t}
                 type="button"
                 onClick={() => setSplitType(t)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium ${
                   splitType === t
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -196,11 +196,11 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                   onChange={(e) =>
                     setIncluded((prev) => ({ ...prev, [m]: e.target.checked }))
                   }
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                  className="h-5 w-5 rounded border-gray-300 text-indigo-600"
                 />
                 <label
                   htmlFor={`member-${m}`}
-                  className="text-sm text-gray-700 w-20"
+                  className="text-sm text-gray-700 w-24 py-2.5"
                 >
                   {m}
                 </label>
@@ -219,7 +219,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                           [m]: e.target.value,
                         }))
                       }
-                      className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                      className="w-20 border border-gray-300 rounded px-2 py-1.5 text-base"
                     />
                     <span className="text-sm text-gray-500">%</span>
                   </div>
@@ -239,7 +239,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                           [m]: e.target.value,
                         }))
                       }
-                      className="w-24 border border-gray-300 rounded px-2 py-1 text-sm"
+                      className="w-28 border border-gray-300 rounded px-2 py-1.5 text-base"
                       placeholder="0.00"
                     />
                   </div>

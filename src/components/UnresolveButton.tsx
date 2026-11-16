@@ -16,14 +16,14 @@ export default function UnresolveButton({ id }: { id: string }) {
       <button
         type="button"
         onClick={() => setShowConfirm(true)}
-        className="text-xs text-amber-500 hover:text-amber-700"
+        className="min-h-[44px] px-3 text-sm font-medium text-amber-600 hover:text-amber-800"
       >
         Undo resolve
       </button>
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-72 space-y-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-72 max-w-[calc(100vw-2rem)] space-y-4">
             <p className="text-sm font-medium text-gray-800">Undo resolve?</p>
             <p className="text-xs text-gray-500">The expense will reappear in the active list.</p>
             <div className="flex gap-3 justify-end">
@@ -31,7 +31,7 @@ export default function UnresolveButton({ id }: { id: string }) {
                 type="button"
                 disabled={isPending}
                 onClick={() => setShowConfirm(false)}
-                className="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                className="text-sm px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
               >
                 Cancel
               </button>
@@ -39,7 +39,7 @@ export default function UnresolveButton({ id }: { id: string }) {
                 type="button"
                 disabled={isPending}
                 onClick={handleConfirm}
-                className="text-sm px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-60 flex items-center gap-2"
+                className="text-sm px-4 py-2.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-60 flex items-center gap-2"
               >
                 {isPending && (
                   <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">

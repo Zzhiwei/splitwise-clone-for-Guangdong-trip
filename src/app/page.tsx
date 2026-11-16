@@ -33,7 +33,7 @@ export default async function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-gray-800">Recent expenses</h2>
-          <a href="/expenses" className="text-sm text-indigo-600 hover:underline">
+          <a href="/expenses" className="inline-block text-sm text-indigo-600 hover:underline py-3">
             View all
           </a>
         </div>

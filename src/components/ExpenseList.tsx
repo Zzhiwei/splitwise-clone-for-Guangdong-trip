@@ -36,44 +36,44 @@ export default function ExpenseList({ expenses, currency, showResolve = true, sh
           key={expense.id}
           className="bg-white rounded-xl border border-gray-200 p-4"
         >
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="font-semibold text-gray-900">{expense.title}</p>
+          <div className="flex justify-between items-start gap-3">
+            <div className="min-w-0">
+              <p className="font-semibold text-gray-900 break-words">{expense.title}</p>
               <p className="text-sm text-gray-500">
                 Paid by:{" "}
                 <span className="font-medium text-gray-700">{expense.paidBy}</span>
                 {" · "}
                 {new Date(expense.date).toLocaleDateString("en-GB")}
               </p>
-              <div className="mt-2 space-y-0.5">
-                {expense.splits.map((s) => (
-                  <SplitRow
-                    key={s.id}
-                    splitId={s.id}
-                    member={s.member}
-                    amount={s.amount}
-                    paidBack={s.paidBack}
-                    paidBy={expense.paidBy}
-                    currency={currency}
-                  />
-                ))}
-              </div>
             </div>
-            <div className="flex items-center gap-3 ml-4 shrink-0">
-              <div className="text-right">
-                <span className="text-lg font-bold text-gray-900">
-                  {formatMoney(expense.amount, currency)}
-                </span>
-                {expense.sourceCurrency !== currency && (
-                  <p className="text-xs text-gray-400">
-                    {expense.sourceCurrency} {expense.sourceAmount.toFixed(2)}
-                  </p>
-                )}
-              </div>
-              {showResolve && <ResolveButton id={expense.id} />}
-              {showUnresolve && <UnresolveButton id={expense.id} />}
-              <DeleteButton id={expense.id} />
+            <div className="text-right shrink-0">
+              <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
+                {formatMoney(expense.amount, currency)}
+              </span>
+              {expense.sourceCurrency !== currency && (
+                <p className="text-xs text-gray-400 whitespace-nowrap">
+                  {expense.sourceCurrency} {expense.sourceAmount.toFixed(2)}
+                </p>
+              )}
             </div>
+          </div>
+          <div className="mt-2 divide-y divide-gray-50">
+            {expense.splits.map((s) => (
+              <SplitRow
+                key={s.id}
+                splitId={s.id}
+                member={s.member}
+                amount={s.amount}
+                paidBack={s.paidBack}
+                paidBy={expense.paidBy}
+                currency={currency}
+              />
+            ))}
+          </div>
+          <div className="mt-2 pt-1 border-t border-gray-100 flex justify-end">
+            {showResolve && <ResolveButton id={expense.id} />}
+            {showUnresolve && <UnresolveButton id={expense.id} />}
+            <DeleteButton id={expense.id} />
           </div>
         </li>
       ))}

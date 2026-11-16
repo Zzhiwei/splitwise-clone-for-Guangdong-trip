@@ -15,7 +15,7 @@ export default function CurrencyToggle({ current }: { current: Currency }) {
           type="button"
           disabled={isPending}
           onClick={() => startTransition(() => setDisplayCurrency(c))}
-          className={`px-2 py-1 text-xs font-medium ${
+          className={`px-4 py-2 text-sm font-medium ${
             current === c ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-100"
           }`}
         >
