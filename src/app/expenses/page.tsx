@@ -21,8 +21,8 @@ export default async function ExpensesPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">All expenses</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{expenses.length} expenses</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">All expenses</h1>
+          <p className="text-sm text-muted mt-0.5">{expenses.length} expenses</p>
         </div>
         {expenses.length > 0 && <ExportButton expenses={rows} />}
       </div>

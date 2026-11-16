@@ -52,7 +52,7 @@ export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits
   return (
     <button
       onClick={handleExport}
-      className="text-sm border border-gray-300 rounded-lg px-3 py-2.5 text-gray-600 hover:bg-gray-100 transition-colors"
+      className="text-sm border border-hairline rounded-md px-3 py-2.5 text-body hover:bg-elevated transition-colors"
     >
       Export CSV
     </button>

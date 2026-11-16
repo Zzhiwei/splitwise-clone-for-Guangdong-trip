@@ -27,13 +27,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">{TRIP_NAME}</h1>
+      <h1 className="text-2xl font-bold text-white tracking-tight">{TRIP_NAME}</h1>
       <FxRateEditor rate={fxRate} />
       <BalanceSummary net={net} transactions={transactions} currency={display} />
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-800">Recent expenses</h2>
-          <a href="/expenses" className="inline-block text-sm text-indigo-600 hover:underline py-3">
+          <h2 className="text-lg font-semibold text-white">Recent expenses</h2>
+          <a href="/expenses" className="inline-block text-sm text-primary hover:underline py-3">
             View all
           </a>
         </div>

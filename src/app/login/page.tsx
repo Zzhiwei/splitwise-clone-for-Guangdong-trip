@@ -18,16 +18,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-80 space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas">
+      <div className="bg-card rounded-xl border border-hairline p-8 w-80 space-y-5">
         <div className="text-center">
-          <p className="text-2xl font-bold text-indigo-600">Splitwize</p>
-          <p className="text-sm text-gray-500 mt-1">Vietnam Trip</p>
+          <p className="text-2xl font-bold text-primary tracking-tight">Splitwize</p>
+          <p className="text-sm text-muted mt-1">Vietnam Trip</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-body mb-1">
               Password
             </label>
             <input
@@ -36,19 +36,19 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoFocus
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
               placeholder="Enter password"
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-500">{error}</p>
+            <p className="text-xs text-down">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={isPending}
-            className="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-primary text-ink py-2.5 rounded-md font-semibold hover:bg-primary-active transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isPending && (
               <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

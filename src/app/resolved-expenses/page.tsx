@@ -19,8 +19,8 @@ export default async function ResolvedExpensesPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Resolved expenses</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{expenses.length} expenses</p>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Resolved expenses</h1>
+        <p className="text-sm text-muted mt-0.5">{expenses.length} expenses</p>
       </div>
       <ExpenseList expenses={expenses} currency={display} showResolve={false} showUnresolve={true} />
     </div>

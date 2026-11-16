@@ -18,7 +18,7 @@ export default function FxRateEditor({ rate }: { rate: number }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-700">
+    <div className="bg-card rounded-xl border border-hairline px-4 py-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-body">
       <span className="font-medium whitespace-nowrap">FX rate</span>
       {editing ? (
         <>
@@ -29,13 +29,13 @@ export default function FxRateEditor({ rate }: { rate: number }) {
             min="0"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="w-24 border border-gray-300 rounded px-2 py-1.5 text-base"
+            className="w-24 bg-card border border-hairline text-white rounded-md px-2 py-1.5 font-num focus:outline-none focus:ring-2 focus:ring-info/50 text-base"
           />
           <span className="whitespace-nowrap">VND</span>
           <button
             onClick={save}
             disabled={isPending}
-            className="ml-auto min-h-[44px] px-2 text-indigo-600 font-medium disabled:opacity-50"
+            className="ml-auto min-h-[44px] px-2 text-primary font-medium disabled:opacity-50"
           >
             {isPending ? "Saving…" : "Save"}
           </button>
@@ -44,17 +44,17 @@ export default function FxRateEditor({ rate }: { rate: number }) {
               setValue(String(rate));
               setEditing(false);
             }}
-            className="min-h-[44px] px-2 text-gray-500"
+            className="min-h-[44px] px-2 text-muted"
           >
             Cancel
           </button>
         </>
       ) : (
         <>
-          <span className="whitespace-nowrap">1 SGD = {rate.toLocaleString("en-US")} VND</span>
+          <span className="font-num whitespace-nowrap">1 SGD = {rate.toLocaleString("en-US")} VND</span>
           <button
             onClick={() => setEditing(true)}
-            className="ml-auto min-h-[44px] px-2 text-indigo-600 font-medium"
+            className="ml-auto min-h-[44px] px-2 text-primary font-medium"
           >
             Edit
           </button>

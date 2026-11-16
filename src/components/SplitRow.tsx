@@ -28,15 +28,15 @@ export default function SplitRow({ splitId, member, amount, paidBack, paidBy, cu
       onClick={handleToggle}
       className={`flex items-center gap-2 min-h-[40px] ${!isOwn ? "cursor-pointer select-none" : ""} ${isPending ? "opacity-50" : ""}`}
     >
-      <span className="flex-1 min-w-0 truncate text-sm text-gray-600">{member}</span>
-      <span className="text-sm text-gray-500 whitespace-nowrap">{formatMoney(amount, currency)}</span>
+      <span className="flex-1 min-w-0 truncate text-sm text-body">{member}</span>
+      <span className="font-num text-sm text-body whitespace-nowrap">{formatMoney(amount, currency)}</span>
       <span className="w-24 text-right text-xs whitespace-nowrap">
         {isOwn ? (
-          <span className="text-indigo-400">Payer</span>
+          <span className="text-primary">Payer</span>
         ) : paidBack ? (
-          <span className="text-green-500">✓ Paid back</span>
+          <span className="text-up">✓ Paid back</span>
         ) : (
-          <span className="text-gray-400">○ Unpaid</span>
+          <span className="text-muted">○ Unpaid</span>
         )}
       </span>
     </div>

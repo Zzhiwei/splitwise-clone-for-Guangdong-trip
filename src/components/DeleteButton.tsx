@@ -16,22 +16,22 @@ export default function DeleteButton({ id }: { id: string }) {
       <button
         type="button"
         onClick={() => setShowConfirm(true)}
-        className="min-h-[44px] px-3 text-sm font-medium text-red-500 hover:text-red-700"
+        className="min-h-[44px] px-3 text-sm font-medium text-down hover:opacity-80"
       >
         Delete
       </button>
 
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-72 max-w-[calc(100vw-2rem)] space-y-4">
-            <p className="text-sm font-medium text-gray-800">Delete this expense?</p>
-            <p className="text-xs text-gray-500">This cannot be undone.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="bg-card rounded-xl border border-hairline p-6 w-72 max-w-[calc(100vw-2rem)] space-y-4">
+            <p className="text-sm font-medium text-white">Delete this expense?</p>
+            <p className="text-xs text-muted">This cannot be undone.</p>
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => setShowConfirm(false)}
-                className="text-sm px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                className="text-sm px-4 py-2.5 rounded-md border border-hairline text-body hover:bg-elevated disabled:opacity-40"
               >
                 Cancel
               </button>
@@ -39,7 +39,7 @@ export default function DeleteButton({ id }: { id: string }) {
                 type="button"
                 disabled={isPending}
                 onClick={handleConfirm}
-                className="text-sm px-4 py-2.5 rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-60 flex items-center gap-2"
+                className="text-sm px-4 py-2.5 rounded-md bg-down text-white font-semibold hover:opacity-90 disabled:opacity-60 flex items-center gap-2"
               >
                 {isPending && (
                   <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">

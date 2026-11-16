@@ -81,23 +81,23 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Add expense · {TRIP_NAME}</h1>
+      <h1 className="text-2xl font-bold text-white tracking-tight">Add expense · {TRIP_NAME}</h1>
 
       <form action={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-body mb-1">
             Description
           </label>
           <input
             name="title"
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
             placeholder="e.g. Pho in Hanoi"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-body mb-1">
             Amount ({currency})
           </label>
           <div className="flex gap-2 mb-2">
@@ -108,8 +108,8 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                 onClick={() => setCurrency(c)}
                 className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium ${
                   currency === c
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-primary text-ink font-semibold"
+                    : "bg-elevated text-body hover:bg-hairline"
                 }`}
               >
                 {c}
@@ -124,19 +124,19 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
             placeholder="0.00"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-body mb-1">
             Paid by
           </label>
           <select
             name="paidBy"
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
           >
             {MEMBERS.map((m) => (
               <option key={m} value={m}>
@@ -147,7 +147,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-body mb-1">
             Date
           </label>
           <input
@@ -155,12 +155,12 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             type="date"
             defaultValue={today}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full bg-card border border-hairline text-white placeholder:text-muted rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-info/50 focus:border-info"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-body mb-2">
             Split method
           </label>
           <input type="hidden" name="splitType" value={splitType} />
@@ -172,8 +172,8 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                 onClick={() => setSplitType(t)}
                 className={`px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium ${
                   splitType === t
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-primary text-ink font-semibold"
+                    : "bg-elevated text-body hover:bg-hairline"
                 }`}
               >
                 {t === "equal" ? "Equal" : t === "percentage" ? "By percentage" : "Custom"}
@@ -183,7 +183,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-body mb-2">
             Participants
           </label>
           <div className="space-y-2">
@@ -196,11 +196,11 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                   onChange={(e) =>
                     setIncluded((prev) => ({ ...prev, [m]: e.target.checked }))
                   }
-                  className="h-5 w-5 rounded border-gray-300 text-indigo-600"
+                  className="h-5 w-5 rounded border-hairline accent-primary"
                 />
                 <label
                   htmlFor={`member-${m}`}
-                  className="text-sm text-gray-700 w-24 py-2.5"
+                  className="text-sm text-body w-24 py-2.5"
                 >
                   {m}
                 </label>
@@ -219,15 +219,15 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                           [m]: e.target.value,
                         }))
                       }
-                      className="w-20 border border-gray-300 rounded px-2 py-1.5 text-base"
+                      className="w-20 bg-card border border-hairline text-white rounded-md px-2 py-1.5 font-num focus:outline-none focus:ring-2 focus:ring-info/50 text-base"
                     />
-                    <span className="text-sm text-gray-500">%</span>
+                    <span className="text-sm text-muted">%</span>
                   </div>
                 )}
 
                 {splitType === "exact" && included[m] && (
                   <div className="flex items-center gap-1">
-                    <span className="text-sm text-gray-500">{currency}</span>
+                    <span className="text-sm text-muted">{currency}</span>
                     <input
                       type="number"
                       min="0"
@@ -239,14 +239,14 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
                           [m]: e.target.value,
                         }))
                       }
-                      className="w-28 border border-gray-300 rounded px-2 py-1.5 text-base"
+                      className="w-28 bg-card border border-hairline text-white rounded-md px-2 py-1.5 font-num focus:outline-none focus:ring-2 focus:ring-info/50 text-base"
                       placeholder="0.00"
                     />
                   </div>
                 )}
 
                 {splitType === "equal" && included[m] && total > 0 && (
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-muted">
                     {currency}{" "}
                     {(
                       Math.round((total / activeMembers.length) * 100) / 100
@@ -261,8 +261,8 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             <p
               className={`mt-2 text-xs ${
                 Math.abs(percentageSum - 100) < 0.1
-                  ? "text-green-600"
-                  : "text-red-500"
+                  ? "text-up"
+                  : "text-down"
               }`}
             >
               Total: {percentageSum.toFixed(1)}% {Math.abs(percentageSum - 100) < 0.1 ? "✓" : "(must equal 100%)"}
@@ -273,8 +273,8 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
             <p
               className={`mt-2 text-xs ${
                 Math.abs(exactSum - total) < 0.02
-                  ? "text-green-600"
-                  : "text-red-500"
+                  ? "text-up"
+                  : "text-down"
               }`}
             >
               Total: {exactSum.toFixed(2)} / {total.toFixed(2)} {currency}{" "}
@@ -286,7 +286,7 @@ export default function AddExpenseForm({ defaultCurrency }: { defaultCurrency: C
         <button
           type="submit"
           disabled={isPending}
-          className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-primary text-ink py-3 rounded-md font-semibold hover:bg-primary-active transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isPending && (
             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">

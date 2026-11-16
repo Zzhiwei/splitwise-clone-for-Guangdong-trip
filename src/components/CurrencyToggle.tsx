@@ -8,7 +8,7 @@ export default function CurrencyToggle({ current }: { current: Currency }) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className={`flex rounded-md overflow-hidden border border-gray-200 ${isPending ? "opacity-50" : ""}`}>
+    <div className={`flex rounded-md overflow-hidden border border-hairline ${isPending ? "opacity-50" : ""}`}>
       {CURRENCIES.map((c) => (
         <button
           key={c}
@@ -16,7 +16,7 @@ export default function CurrencyToggle({ current }: { current: Currency }) {
           disabled={isPending}
           onClick={() => startTransition(() => setDisplayCurrency(c))}
           className={`px-4 py-2 text-sm font-medium ${
-            current === c ? "bg-indigo-600 text-white" : "bg-white text-gray-600 hover:bg-gray-100"
+            current === c ? "bg-primary text-ink font-semibold" : "bg-card text-body hover:bg-elevated"
           }`}
         >
           {c}

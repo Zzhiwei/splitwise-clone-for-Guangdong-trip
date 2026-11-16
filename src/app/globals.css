@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Dark native controls (date picker, select popup, number spinners). */
+:root {
+  color-scheme: dark;
+}
