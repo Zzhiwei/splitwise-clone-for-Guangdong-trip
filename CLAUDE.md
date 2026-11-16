@@ -70,6 +70,14 @@ Connection string rules:
 
 On a network that blocks Postgres (for example behind a corporate proxy), TCP connects but the handshake hangs and Prisma reports `P1001`. Either switch networks or tunnel the DB ports through an HTTP `CONNECT` proxy; `pg` and Prisma have no built-in proxy support.
 
+Tunnel recipe (proven with a local HTTP proxy on `127.0.0.1:8888`): run a small Node TCP server that accepts on a local port (for example 15432), connects to the proxy, sends `CONNECT <pooler-host>:5432 HTTP/1.1`, and pipes bytes after the `200`. Then:
+- Prisma CLI: set `DIRECT_URL` for that one command to `postgresql://<user>:<pw>@127.0.0.1:15432/postgres?sslaccept=accept_invalid_certs`, then `npx prisma migrate deploy`. The certificate check has to be relaxed because the host name no longer matches.
+- Dev server: start `next dev` with `DATABASE_URL=...@127.0.0.1:15432/postgres?sslmode=no-verify` (session pooler, port 5432, is fine for dev).
+- Scripts using `pg`: connect to `127.0.0.1:15432` with `ssl: { rejectUnauthorized: false, servername: <pooler-host> }`.
+- Git: `git -c http.proxy=http://127.0.0.1:8888 push` (a plain push gets HTTP 403 on the corporate network).
+
+Dev seed data: rows with id `seed-*` and title prefix `[seed]` are test data in the shared DB. Delete them before the trip (`delete from "Expense" where id like 'seed-%'`; splits cascade).
+
 ### Migrations
 
 ```bash
@@ -95,7 +103,7 @@ npm test          # vitest, balance logic only (no DB needed)
 
 ## Auth
 
-`src/middleware.ts` checks for an `httpOnly` cookie `splitwize_auth=ok` on every request (except `/login` and static assets). Missing or invalid cookie → redirect to `/login`. The login page calls the `verifyPassword` server action, which compares against `process.env.APP_PASSWORD` and sets the cookie (30-day expiry) on success. `APP_PASSWORD` is never exposed to the client.
+`src/middleware.ts` checks for an `httpOnly` cookie `splitwize_auth=ok` on every request (except `/login` and static assets). Missing or invalid cookie → redirect to `/login`. The login page calls the `verifyPassword` server action, which compares against `process.env.APP_PASSWORD` and sets the cookie (30-day expiry) on success. `APP_PASSWORD` is never exposed to the client. For browser tests, setting the cookie from JS (`document.cookie = "splitwize_auth=ok; path=/"`) is enough to pass the middleware.
 
 ## Soft delete & resolve
 
@@ -120,7 +128,7 @@ Each browser has a display currency (cookie `splitwize_currency`, default `BASE_
 
 The SGD→VND rate is one global setting (`Setting` table, key `sgdToVnd`), edited in `FxRateEditor` on the home page (`setFxRate`); `DEFAULT_SGD_TO_VND` applies until set. Conversion is not rounded (`balance.ts` rounds each net balance to 0.01; `formatMoney` rounds for display), so changing the rate immediately changes every converted amount and balance, including resolved expenses on `/resolved-expenses`.
 
-Display: `formatMoney` shows whole đồng for VND and 2 decimals for SGD. Dates use the `en-GB` locale. The CSV export on `/expenses` is in the display currency with `Original Currency` and `Original Amount` columns.
+Display: `formatMoney` shows whole đồng for VND and 2 decimals for SGD. Dates use the `en-GB` locale. Both CSV exports (the `/expenses` button and the daily Edge Function) use the same columns, with amounts as stored in each expense's own currency (a `Currency` column says which), regardless of the display currency.
 
 ## Split types
 
@@ -134,7 +142,7 @@ Display: `formatMoney` shows whole đồng for VND and 2 decimals for SGD. Dates
 
 `supabase/setup-export-cron.sql` creates the bucket and schedules `pg_cron` job `export-expenses-daily` (`59 16 19-26 11 *` UTC = 23:59 Vietnam time, 19-26 November) which calls the function through `pg_net`, reading the secret from Vault. `pg_cron` has no year field, so unschedule the job after the trip (`select cron.unschedule('export-expenses-daily');`).
 
-Status: deployed and scheduled on the production project (`jysgnkufiqafkmayhnog`) on 2026-11-15. Verified end to end: wrong or missing secret returns 401, a call outside the window returns `outside window (...)`, and inside the window it uploads a correct CSV (tested once with a temporary window and a seed row, both removed). The cron job's own HTTP call (Vault secret) was also run by hand and returned 200. The real scheduled firing happens first on 2026-11-19 23:59 Vietnam time; check Storage → `expense-exports` the next morning.
+Status (as of 2026-11-16): the function's code was updated for the own-currency schema (no `originalAmount` column, amounts per expense currency) but it has **not been redeployed yet**; the old deployed version selects `originalAmount` and will fail against the current DB. Redeploy before the first run on 2026-11-19. Earlier status: deployed and scheduled on the production project (`jysgnkufiqafkmayhnog`) on 2026-11-15. Verified end to end: wrong or missing secret returns 401, a call outside the window returns `outside window (...)`, and inside the window it uploads a correct CSV (tested once with a temporary window and a seed row, both removed). The cron job's own HTTP call (Vault secret) was also run by hand and returned 200. The real scheduled firing happens first on 2026-11-19 23:59 Vietnam time; check Storage → `expense-exports` the next morning.
 
 If you need to redo it (the Supabase CLI keeps local state in `supabase/.temp/`, which is gitignored):
 - Deploy: `HTTPS_PROXY=... npx supabase functions deploy export-expenses --no-verify-jwt --use-api --remote=jysgnkufiqafkmayhnog --yes` (needs `npx supabase login` first; JWT verification must stay off because the cron call only sends the shared secret).

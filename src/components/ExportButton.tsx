@@ -1,15 +1,15 @@
 "use client";
 
 import type { Expense, Split } from "@/generated/prisma/client";
-import { MEMBERS, type Currency } from "@/lib/constants";
+import { MEMBERS } from "@/lib/constants";
 
-// Amounts are in the display currency; source* are the entered values.
-type ExpenseWithSplits = Expense & { splits: Split[]; sourceCurrency: string; sourceAmount: number };
+type ExpenseWithSplits = Expense & { splits: Split[] };
 
-export default function ExportButton({ expenses, currency }: { expenses: ExpenseWithSplits[]; currency: Currency }) {
+export default function ExportButton({ expenses }: { expenses: ExpenseWithSplits[] }) {
   function handleExport() {
     const rows: string[][] = [
-      ["Date", "Title", "Paid By", `Total (${currency})`, "Split Type", ...MEMBERS.map((m) => `${m} (${currency})`), "Original Currency", "Original Amount"],
+      // Same columns as the daily export function. Amounts are as stored, in each expense's own currency.
+      ["Date", "Title", "Paid By", "Currency", "Total", "Split Type", ...MEMBERS, "Status"],
     ];
 
     for (const expense of expenses) {
@@ -20,11 +20,11 @@ export default function ExportButton({ expenses, currency }: { expenses: Expense
         new Date(expense.date).toLocaleDateString("en-GB"),
         expense.title,
         expense.paidBy,
+        expense.currency,
         expense.amount.toFixed(2),
         expense.splitType,
         ...MEMBERS.map((m) => splitMap[m] ?? ""),
-        expense.sourceCurrency,
-        expense.sourceAmount.toFixed(2),
+        expense.resolvedAt ? "resolved" : "active",
       ]);
     }
 
@@ -52,7 +52,7 @@ export default function ExportButton({ expenses, currency }: { expenses: Expense
   return (
     <button
       onClick={handleExport}
-      className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-600 hover:bg-gray-100 transition-colors"
+      className="text-sm border border-gray-300 rounded-lg px-3 py-2.5 text-gray-600 hover:bg-gray-100 transition-colors"
     >
       Export CSV
     </button>

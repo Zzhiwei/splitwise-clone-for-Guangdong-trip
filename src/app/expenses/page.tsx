@@ -24,7 +24,7 @@ export default async function ExpensesPage() {
           <h1 className="text-2xl font-bold text-gray-900">All expenses</h1>
           <p className="text-sm text-gray-500 mt-0.5">{expenses.length} expenses</p>
         </div>
-        {expenses.length > 0 && <ExportButton expenses={expenses} currency={display} />}
+        {expenses.length > 0 && <ExportButton expenses={rows} />}
       </div>
       <ExpenseList expenses={expenses} currency={display} />
     </div>
